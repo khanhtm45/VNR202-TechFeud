@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // The front end only reads public room state and team scorecards.
+    // All writes (including scoring) must pass through authenticated Cloud Functions.
+    match /rooms/{roomCode} {
+      allow get: if request.auth != null;
+      allow list, create, update, delete: if false;
+      match /teams/{teamId} {
+        allow get, list: if request.auth != null;
+        allow create, update, delete: if false;
+      }
+      match /submissions/{submissionId} {
+        allow read, write: if false;
+      }
+    }
+    // Private answer keys are never readable by client-side Firebase SDK.
+    match /roomSecrets/{roomCode} {
+      allow read, write: if false;
+    }
+  }
+}

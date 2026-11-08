@@ -6,8 +6,8 @@
 <title>VNR202 · Gameshow trực tuyến 8 đội</title>
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="stylesheet" href="./styles.css?v=2">
-<link rel="stylesheet" href="./live.css?v=20261109-fix2">
-<script type="module" src="./live.js?v=20261109-fix2"></script>
+<link rel="stylesheet" href="./live.css?v=visual3">
+<script type="module" src="./live.js?v=visual3"></script>
 </head>
 <body class="live-page">
 <div class="page live-shell">
@@ -60,12 +60,16 @@
           <label class="field-label" for="hostCode">Mã phòng đã tạo (mở lại sau khi tải trang)</label>
           <div class="form-row"><input id="hostCode" maxlength="6" inputmode="numeric" placeholder="6 chữ số"><button id="resumeHost" type="button" class="live-button">Mở</button></div>
           <div id="hostRoomCard" class="host-room-card" hidden>
-            <p class="live-muted">MÃ PHÒNG CHO CÁC ĐỘI</p>
+            <div class="qr-invite-icon" aria-hidden="true">✦ QR VÀO PHÒNG ✦</div>
+            <h4>Quét để tham gia ngay</h4>
+            <div class="qr-wrap"><img id="qrImage" alt="Mã QR dẫn đến trang đăng ký đội chơi" width="292" height="292" loading="eager"></div>
+            <p class="live-muted qr-caption">Mở camera điện thoại và quét mã này</p>
+            <p class="live-muted">HOẶC NHẬP MÃ PHÒNG</p>
             <div id="hostRoomCode" class="room-code">------</div>
-            <div class="qr-wrap"><img id="qrImage" alt="Mã QR để đội vào phòng" width="164" height="164"></div>
-            <p class="live-muted small">QR được tạo qua dịch vụ QR bên ngoài, chỉ chứa đường dẫn và mã phòng.</p>
-            <button id="copyJoinLink" type="button" class="live-button">Sao chép link tham gia</button>
-            <button id="openBoard" type="button" class="live-button">Mở màn hình máy chiếu</button>
+            <div id="hostJoinCount" class="qr-join-count">0/8 đội đã tham gia</div>
+            <p class="live-muted small">1 điện thoại đại diện/đội · Tối đa 8 đội · Ít nhất 1 đội có thể bắt đầu</p>
+            <button id="copyJoinLink" type="button" class="live-button">📋 Sao chép đường dẫn tham gia</button>
+            <button id="openBoard" type="button" class="live-button primary">📺 Mở màn hình chờ có QR</button>
           </div>
         </aside>
         <div class="host-stage">
@@ -107,6 +111,9 @@
           <div id="playerStatus" class="live-muted">Đang chờ MC bắt đầu…</div>
           <div class="live-question">
             <div id="playerRound" class="live-kicker"></div>
+            <figure id="playerArtWrap" class="question-art player-art" hidden>
+              <img id="playerArt" src="" alt="Hình minh họa cho câu hỏi" loading="eager" decoding="async">
+            </figure>
             <h3 id="playerPrompt">Hãy chuẩn bị!</h3>
             <div id="playerTimer" class="countdown">00:00</div>
             <div id="playerChoices" class="choices"></div>
@@ -120,8 +127,36 @@
     <section id="boardScreen" class="live-screen" hidden>
       <div class="section-line board-title-row"><div><p class="live-kicker">MÀN HÌNH MÁY CHIẾU</p><h2>Đấu trường VNR202</h2></div><div class="form-row"><input id="boardCode" inputmode="numeric" maxlength="6" placeholder="Mã phòng"><button id="watchBoard" class="live-button" type="button" disabled>Xem phòng</button><button id="boardFullscreen" class="live-button" type="button">Toàn màn hình</button></div></div>
       <div class="board-meta"><div id="boardRoomCode" class="code-inline">PHÒNG ------</div><div id="boardStatus" class="status-pill">Đang chờ kết nối</div><div id="boardTimer" class="countdown">00:00</div></div>
+      <section id="boardLobby" class="live-panel board-lobby" hidden aria-label="Quét mã QR để tham gia phòng">
+        <div class="board-lobby-copy">
+          <span class="live-kicker">VNR202 • SẴN SÀNG XUẤT PHÁT</span>
+          <h2>Quét mã QR<br>để vào phòng!</h2>
+          <p>Mỗi đội chỉ cần <strong>một điện thoại</strong>. Quét mã, nhập tên đội rồi chờ MC bắt đầu.</p>
+          <span class="board-lobby-mini">MÃ PHÒNG</span>
+          <div id="boardJoinCode" class="board-join-code">------</div>
+          <div id="boardJoinCount" class="board-join-count">0/8 ĐỘI ĐÃ THAM GIA</div>
+          <p class="board-minimum">Tối thiểu 1 đội để bắt đầu · Nên có từ 2 đội trở lên</p>
+        </div>
+        <div class="board-lobby-qr">
+          <span class="board-qr-top">QUÉT BẰNG CAMERA ĐIỆN THOẠI</span>
+          <div class="board-qr-frame"><img id="boardQRImage" src="" alt="QR tham gia phòng gameshow VNR202" width="328" height="328" loading="eager"></div>
+          <span class="board-qr-bottom">ĐĂNG KÝ ĐỘI • THAM GIA • TRẢ LỜI</span>
+        </div>
+      </section>
       <div id="boardTeams" class="live-team-grid"></div>
-      <div class="live-panel board-main-question"><p id="boardRound" class="live-kicker">HÀNH TRÌNH ĐỔI MỚI</p><h2 id="boardPrompt">Các đội hãy vào phòng bằng mã QR hoặc mã phòng.</h2><div id="boardChoices" class="choices board-choices"></div><div id="boardReveal" class="answer-reveal" hidden></div></div>
+      <div id="boardMainQuestion" class="live-panel board-main-question">
+        <p id="boardRound" class="live-kicker">HÀNH TRÌNH ĐỔI MỚI</p>
+        <div class="board-question-layout">
+          <figure id="boardArtWrap" class="question-art board-art" hidden>
+            <img id="boardArt" src="" alt="Hình minh họa cho câu hỏi đang trình chiếu" loading="eager" decoding="async">
+          </figure>
+          <div class="board-question-copy">
+            <h2 id="boardPrompt">Các đội hãy vào phòng bằng mã QR hoặc mã phòng.</h2>
+            <div id="boardChoices" class="choices board-choices"></div>
+          </div>
+        </div>
+        <div id="boardReveal" class="answer-reveal" hidden></div>
+      </div>
       <div id="leaderboard" class="live-panel leaderboard" hidden></div>
     </section>
   </main>

@@ -197,10 +197,16 @@
     s.awards = raw.awards && typeof raw.awards === 'object' ? raw.awards : {};
     s.slots = Array.isArray(raw.slots) ? raw.slots.filter(Number.isInteger) : [];
     s.selectedTeamId = s.teams.some(t => t.id === Number(raw.selectedTeamId)) ? Number(raw.selectedTeamId) : 1;
-    // Pause after a refresh to prevent a clock continuing while nobody watches it.
-    s.remainingMs = remainingMs(s);
-    s.running = false;
-    s.deadline = 0;
+    // Preserve a running timer across tabs or refreshes. Its deadline is absolute.
+    // When the saved deadline has passed, show zero instead of restarting the clock.
+    if (s.running) {
+      s.remainingMs = remainingMs(s);
+      if (s.remainingMs === 0) { s.running = false; s.deadline = 0; }
+    } else {
+      s.remainingMs = Math.max(0, Number(s.remainingMs) || 0);
+      s.deadline = 0;
+    }
+    if (!['lobby', 'finale', ...STAGES].includes(s.stage)) s.stage = 'lobby';
     return s;
   }
 

@@ -3,7 +3,18 @@
  * No service_role key is ever shipped to the browser.
  * Real scoring + all permission checks are handled in Postgres SECURITY DEFINER RPCs.
  */
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// Try the primary CDN, then a second provider. A single CDN outage must not
+// look like the Supabase database itself has disconnected.
+let createClient;
+try {
+  ({ createClient } = await import('https://esm.sh/@supabase/supabase-js@2'));
+} catch (primaryError) {
+  try {
+    ({ createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'));
+  } catch (secondaryError) {
+    throw new Error('Không tải được thư viện Supabase từ cả hai CDN. Hãy kiểm tra mạng hoặc tắt trình chặn script.');
+  }
+}
 
 export function initializeApp(config) {
   return createClient(config.url, config.anonKey, {

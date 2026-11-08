@@ -34,6 +34,18 @@ Gameshow môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại h
 
 **Tài nguyên miễn phí:** Supabase có gói Free với hạn mức, có thể tự tạm dừng database sau thời gian không hoạt động. Nên mở trang và chạy thử trước buổi học.
 
+## ✨ Giao diện minh họa, QR chờ đội và hiệu ứng
+
+- **20 ảnh SVG minh họa gốc**, một ảnh cho mỗi mã câu hỏi của bộ JSON 20 câu VNR202: r1–r8, f1–f6, g1–g6, lưu tại `docs/art/questions/`. Đây là **đồ họa minh họa**, không phải ảnh tư liệu Đại hội.
+- **3 banner màu theo vòng** (lịch sử vàng tím; giải mã hồng đỏ; Việt Nam xanh ngọc) trong `docs/art/banners/`.
+- Khi MC tải **tệp JSON 20 câu đã phát riêng**, website tự gắn ảnh theo `id` nên **không cần sửa tệp JSON hoặc công khai đáp án**. Các mã câu khác tự dùng banner của vòng.
+- **QR lớn ngay trên màn hình MC** và **trang chờ máy chiếu**, mở trực tiếp đường dẫn nhập mã phòng của đội. Khi quét QR, mã phòng đã được điền tự động. Mã phòng 6 chữ số luôn hiện dưới QR để nhập dự phòng.
+- Danh sách đội hiển thị số đội đã vào, hiệu ứng đáp án đúng, điểm vừa cộng và thứ hạng khi công bố.
+- Tối thiểu **1 MC + 1 đội (1 điện thoại)** để bắt đầu về mặt kỹ thuật; **nên có 1 MC + từ 2 đội** để tổ chức so tài. Giới hạn 8 đội/phòng; mỗi đội có thể có nhiều người nhưng chỉ cần một điện thoại đại diện.
+- QR dùng dịch vụ tạo mã công khai `api.qrserver.com` với `quickchart.io` làm dự phòng; mã QR chỉ chứa **đường dẫn public và mã phòng**, không chứa mật khẩu.
+- Nếu muốn thay ảnh cho một câu, sửa chính SVG tương ứng trong `docs/art/questions/`, không chỉnh câu đáp án. Ảnh dự phòng của vòng áp dụng cho câu có mã ngoài bộ 20.
+- Bản này không thay luật tính điểm trong Supabase và không thay yêu cầu đăng nhập MC.
+
 ## 🖥 Chế độ một máy — dự phòng khi không có backend
 
 **[Mở giao diện gốc](https://khanhtm45.github.io/VNR202-TechFeud/)**

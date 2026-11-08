@@ -6,6 +6,11 @@ const MODES=['host','player','board'];
 const MODE_LABELS={host:'MC',player:'Đội chơi',board:'Máy chiếu'};
 const STAGES={rapid:'Vòng 1 · Dấu mốc lịch sử',feud:'Vòng 2 · Giải mã Đại hội',green:'Vòng 3 · Việt Nam xanh'};
 const LETTERS=['A','B','C','D'];
+const ART_IDS={
+  rapid:new Set(['r1','r2','r3','r4','r5','r6','r7','r8']),
+  feud:new Set(['f1','f2','f3','f4','f5','f6']),
+  green:new Set(['g1','g2','g3','g4','g5','g6'])
+};
 let mode=new URLSearchParams(location.search).get('mode')||'player';
 // The Supabase email magic-link may also use ?code=PKCE_TOKEN. Only six digits are a room code.
 const urlCode=(new URLSearchParams(location.search).get('code')||'').trim();
@@ -113,9 +118,45 @@ function joinLink(){
   url.searchParams.set('mode','player');url.searchParams.set('code',code);
   return url.toString();
 }
+function qrImageUrl(link,size,backup=false){
+  return backup
+    ?'https://quickchart.io/qr?size='+size+'&margin=2&text='+encodeURIComponent(link)
+    :'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&margin=12&data='+encodeURIComponent(link);
+}
 function renderQr(){
+  if(code.length!==6)return;
   const link=joinLink();
-  $('qrImage').src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data='+encodeURIComponent(link);
+  for(const [id,size] of [['qrImage',320],['boardQRImage',392]]){
+    const img=$(id);
+    if(!img||img.dataset.code===code)return;
+    img.dataset.code=code;
+    img.dataset.backup='';
+    img.onerror=()=>{
+      if(!img.dataset.backup){
+        img.dataset.backup='yes';
+        img.src=qrImageUrl(link,size,true);
+      }
+    };
+    img.src=qrImageUrl(link,size);
+  }
+}
+function questionArt(q){
+  if(!q)return './art/banners/rapid.svg';
+  const stage=Object.prototype.hasOwnProperty.call(ART_IDS,q.stage)?q.stage:'rapid';
+  if(ART_IDS[stage].has(q.id))return './art/questions/'+q.id+'.svg';
+  return './art/banners/'+stage+'.svg';
+}
+function syncArt(wrapId,imgId,q,showOnLobby=false){
+  const wrap=$(wrapId),img=$(imgId);
+  if(!wrap||!img)return;
+  const visible=Boolean(q)||(showOnLobby&&room?.status==='lobby');
+  wrap.hidden=!visible;
+  if(!visible)return;
+  const src=questionArt(q);
+  if(img.getAttribute('src')!==src){
+    img.src=src;
+    img.alt=q?'Hình minh họa chủ đề câu '+(q.number||''):'Ảnh chủ đề mở đầu gameshow';
+  }
 }
 function stopListening(){unRoom?.();unTeams?.();unRoom=null;unTeams=null;}
 function watchRoom(value){
@@ -138,24 +179,30 @@ function watchRoom(value){
   },err=>notify('Không đọc được đội chơi: '+err.message,true));
   render();
 }
-function teamCard(team,position){
-  const card=element('div','live-team'+(team?'':' empty'));
-  card.append(element('div','live-team-number',team?.position||position));
+function teamCard(team,position,ranked=false){
+  const leader=ranked&&position===1&&Boolean(team);
+  const card=element('div','live-team'+(team?'':' empty')+(leader?' winner':''));
+  card.append(element('div','live-team-number',team?(ranked?position:team.position):position));
   const detail=element('div','live-team-info');
   detail.append(element('strong','',team?.name||'Chờ đội tham gia'),
     element('span','',team?(team.score||0)+' điểm':'Chưa đăng ký'));
+  if(team&&ranked&&(team.lastGain||0)>0)
+    detail.append(element('span','team-gain','+'+team.lastGain+' điểm vừa nhận'));
   card.append(detail);
+  if(leader)card.append(element('span','leader-crown','👑'));
   return card;
 }
 function renderTeams(target){
-  const sorted=sortedTeams(),frag=document.createDocumentFragment();
-  for(let i=0;i<8;i++)frag.append(teamCard(sorted[i],i+1));
+  const ranked=room?.status==='revealed'||room?.status==='finished';
+  const sorted=ranked?rankings():sortedTeams();
+  const frag=document.createDocumentFragment();
+  for(let i=0;i<8;i++)frag.append(teamCard(sorted[i],i+1,ranked));
   $(target).replaceChildren(frag);
 }
 function createChoice(text,index,interactive,selected,correct){
   const button=element(interactive?'button':'div',interactive?'':'choice-display');
   if(interactive)button.type='button';
-  const letter=element('span','',LETTERS[index]);
+  const letter=element('span','choice-letter',LETTERS[index]);
   button.append(letter,document.createTextNode(text));
   if(correct===index)button.classList.add('correct');
   if(correct!==null&&correct!==undefined&&correct!==index&&selected===index)button.classList.add('incorrect');
@@ -187,13 +234,22 @@ function renderHost(){
   $('createRoom').disabled=!privateQuestions||!user||!hostAuthorized;
   if(room&&host){
     showText('hostRoomCode',code);
-    if($('qrImage').dataset.code!==code){$('qrImage').dataset.code=code;renderQr();}
+    showText('hostJoinCount',teams.length+'/8 đội đã tham gia');
+    renderQr();
   }
   const active=room?.status||'Chưa tạo phòng';
   const labels={lobby:'Chờ đội',question:'Đang nhận đáp án',revealed:'Đã chấm điểm',finished:'Hoàn thành'};
   showText('hostStatus',labels[active]||active);
   const q=room?.current;
-  $('hostPrompt').replaceChildren(element('p','',q?.prompt||(room?.status==='finished'?'Gameshow đã kết thúc.':'Đang chờ MC tạo phòng hoặc bắt đầu câu hỏi.')));
+  const hostPrompt=$('hostPrompt');
+  hostPrompt.replaceChildren();
+  if(q){
+    const art=element('img','host-question-art');
+    art.src=questionArt(q);
+    art.alt='Hình minh họa câu '+(q.number||'');
+    hostPrompt.append(art);
+  }
+  hostPrompt.append(element('p','',q?.prompt||(room?.status==='finished'?'Gameshow đã kết thúc.':'Đang chờ MC tạo phòng hoặc bắt đầu câu hỏi.')));
   const isLobby=room?.status==='lobby',isRevealed=room?.status==='revealed';
   $('nextQuestion').disabled=!host||!teams.length||!(isLobby||isRevealed);
   $('revealQuestion').disabled=!host||room?.status!=='question';
@@ -214,6 +270,7 @@ function renderPlayer(){
   showText('playerStatus',labels[room?.status]||'Đang đồng bộ…');
   const q=room?.current;
   showText('playerRound',q?.stageLabel||'CHỜ BẮT ĐẦU');
+  syncArt('playerArtWrap','playerArt',q,true);
   showText('playerPrompt',q?.prompt||(room?.status==='finished'?'🏆 Đội của bạn đạt '+member.score+' điểm':'Hãy chuẩn bị!'));
   $('playerChoices').hidden=!q;
   renderQuestion('playerChoices',true);
@@ -228,9 +285,18 @@ function renderBoard(){
   showText('boardRoomCode','PHÒNG '+(code||'------'));
   const statusLabels={lobby:'Đang chờ các đội',question:'Đang thi',revealed:'Đã chấm điểm',finished:'Bảng xếp hạng'};
   showText('boardStatus',statusLabels[room?.status]||'Chưa kết nối');
+  const waiting=room?.status==='lobby'&&code.length===6;
+  $('boardLobby').hidden=!waiting;
+  $('boardMainQuestion').hidden=waiting||room?.status==='finished';
+  if(waiting){
+    showText('boardJoinCode',code);
+    showText('boardJoinCount',teams.length+'/8 ĐỘI ĐÃ THAM GIA');
+    renderQr();
+  }
   const q=room?.current;
   showText('boardRound',q?.stageLabel?.toLocaleUpperCase('vi')||'HÀNH TRÌNH ĐỔI MỚI');
   showText('boardPrompt',q?.prompt||(room?.status==='finished'?'🏆 KẾT QUẢ CHUNG CUỘC':'Các đội hãy vào phòng bằng mã QR hoặc mã phòng.'));
+  syncArt('boardArtWrap','boardArt',q);
   renderQuestion('boardChoices');
   $('boardChoices').hidden=!q;
   $('boardReveal').hidden=room?.status!=='revealed';
@@ -238,15 +304,21 @@ function renderBoard(){
   const results=$('leaderboard');
   results.hidden=room?.status!=='finished';
   if(!results.hidden){
-    results.replaceChildren(element('h2','','🏆 BẢNG XẾP HẠNG 8 ĐỘI'));
+    results.replaceChildren(element('h2','','🏆 BẢNG XẾP HẠNG CHUNG CUỘC'));
     rankings().forEach((t,i)=>{
-      const row=element('div','live-team');
-      row.append(element('div','live-team-number',i+1),element('strong','',t.name+' — '+(t.score||0)+' điểm'));
-      results.append(row);
+      const card=element('div','leaderboard-row'+(i===0?' first-place':''));
+      card.append(element('span','leaderboard-medal',i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)));
+      const info=element('div','leaderboard-member');
+      info.append(element('strong','',t.name),element('span','',(t.score||0)+' điểm'));
+      card.append(info);
+      results.append(card);
     });
   }
 }
 function render(){
+  const stage=room?.current?.stage;
+  document.body.dataset.stage=Object.prototype.hasOwnProperty.call(ART_IDS,stage)?stage:'rapid';
+  document.body.dataset.gameStatus=room?.status||'waiting';
   renderHostAccess();
   if(!room&&mode==='host')showText('hostStatus','Chưa tạo phòng');
   renderHost();renderPlayer();renderBoard();
@@ -287,7 +359,8 @@ function updateClocks(){
       control('REVEAL').catch(()=>{}).finally(()=>{setTimeout(()=>{if(closingKey===key)closingKey='';},3500);});
     }
   }
-  if(mode==='player'&&room?.status==='question'&&time===0)renderQuestion('playerChoices',true);
+  if(mode==='player'&&room?.status==='question'&&time===0)
+    $('playerChoices').querySelectorAll('button').forEach(b=>{b.disabled=true;});
 }
 async function createRoom(){
   if(!hostAuthorized)return notify('Bạn chưa có quyền tạo phòng MC.',true);

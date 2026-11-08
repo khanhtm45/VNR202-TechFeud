@@ -91,9 +91,11 @@ test('Bản GitHub Pages có các thành phần và JavaScript hợp lệ', () =
   for(const id of ['homeTeamGrid','boardTeamGrid','hostTeamGrid','awardTeamSelect','questionList','finalLeaderboard']){
     assert.ok(html.includes('id="'+id+'"'),'missing '+id);
   }
-  for(const source of ['./styles.css','./engine.js','./app.js','./questions.json']){
+  for(const source of ['./styles.css','./engine.js','./app.js']){
     assert.ok(html.includes(source),'missing static asset '+source);
   }
+  assert.ok(fs.existsSync(path.join(__dirname,'../docs/questions.json')),'missing questions.json');
+  assert.ok(fs.readFileSync(path.join(__dirname,'../docs/app.js'),'utf8').includes("fetch('./questions.json"),'question bank not loaded');
   const parsed=spawnSync(process.execPath,['--check',path.join(__dirname,'../docs/app.js')],{encoding:'utf8'});
   assert.equal(parsed.status,0,parsed.stderr);
 });

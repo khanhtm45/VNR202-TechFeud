@@ -123,10 +123,11 @@ function qrImageUrl(link,size,backup=false){
     ?'https://quickchart.io/qr?size='+size+'&margin=2&text='+encodeURIComponent(link)
     :'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&margin=12&data='+encodeURIComponent(link);
 }
-function renderQr(){
+function renderQr(which){
   if(code.length!==6)return;
   const link=joinLink();
-  for(const [id,size] of [['qrImage',320],['boardQRImage',392]]){
+  const targets=which==='host'?[['qrImage',320]]:[['boardQRImage',392]];
+  for(const [id,size] of targets){
     const img=$(id);
     if(!img||img.dataset.code===code)continue;
     img.dataset.code=code;
@@ -235,7 +236,7 @@ function renderHost(){
   if(room&&host){
     showText('hostRoomCode',code);
     showText('hostJoinCount',teams.length+'/8 đội đã tham gia');
-    renderQr();
+    if(mode==='host')renderQr('host');
   }
   const active=room?.status||'Chưa tạo phòng';
   const labels={lobby:'Chờ đội',question:'Đang nhận đáp án',revealed:'Đã chấm điểm',finished:'Hoàn thành'};
@@ -291,7 +292,7 @@ function renderBoard(){
   if(waiting){
     showText('boardJoinCode',code);
     showText('boardJoinCount',teams.length+'/8 ĐỘI ĐÃ THAM GIA');
-    renderQr();
+    if(mode==='board')renderQr('board');
   }
   const q=room?.current;
   showText('boardRound',q?.stageLabel?.toLocaleUpperCase('vi')||'HÀNH TRÌNH ĐỔI MỚI');

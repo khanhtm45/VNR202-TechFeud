@@ -82,3 +82,6 @@
 .host-auth-panel .host-auth-actions{margin:14px 0 20px}
 .host-auth-status{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#183d3b;color:#b3f3d8;border:1px solid #61d4bb80;border-radius:12px;margin:5px 0 18px;padding:10px 14px;font-size:13px;font-weight:800}
 .host-auth-panel button{min-height:42px}
+
+/* Native hidden attribute must win over .host-layout { display:grid } and other layouts. */
+[hidden] { display: none !important; }

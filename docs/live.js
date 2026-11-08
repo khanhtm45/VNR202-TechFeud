@@ -331,6 +331,10 @@ function wire(){
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',async()=>{
     displayMode(b.dataset.mode);
     if(b.dataset.mode==='host'&&user&&!user.is_anonymous&&!hostAuthorized)await checkHostAccess();
+    if(b.dataset.mode!=='host'&&!user&&auth){
+      try{user=(await signInAnonymously(auth)).user;render();}
+      catch(err){notify('Không đăng nhập được người chơi: '+err.message,true);}
+    }
   }));
   $('createRoom').onclick=createRoom;
   $('hostSendOtp').onclick=hostSendOtp;

@@ -4,7 +4,7 @@ Gameshow môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại h
 
 ## 🎮 Chế độ ONLINE — GitHub Pages + Supabase Free
 
-**8 đội tự đăng ký bằng điện thoại.** MC không phải tạo sẵn tên đội và không phải cộng điểm thủ công. **Link MC không cấp quyền:** chỉ email MC đã xác minh và được cho phép mới có thể tạo hoặc điều khiển phòng.
+**8 đội tự đăng ký bằng điện thoại.** MC không phải tạo sẵn tên đội và không phải cộng điểm thủ công. **Link MC không cấp quyền:** chỉ MC đã đăng nhập bằng tên và mật khẩu riêng trong Supabase mới có thể tạo hoặc điều khiển phòng.
 
 | Màn hình | Đường dẫn |
 |---|---|
@@ -16,7 +16,7 @@ Gameshow môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại h
 - **Đã code + push GitHub:** Giao diện ba loại thiết bị, tạo phòng 6 số/QR, đội tự nhập tên, giới hạn 8 đội, bảng xếp hạng, đồng bộ qua Supabase Realtime.
 - **Đã code:** PostgreSQL RPC \`SECURITY DEFINER\` kiểm tra MC, phòng, đáp án, thời gian, chống gửi trùng, tự chấm điểm và không tiết lộ đáp án đúng trước khi công bố.
 - **Đã code:** RLS chỉ cho người tham gia hoặc được cấp quyền xem bảng chiếu đọc bảng điểm; không cho browser cập nhật điểm hay đọc bảng đáp án.
-- **Chưa hoàn thành:** Chủ dự án chưa cấp email MC trong allowlist, chưa xác minh cấu hình Authentication email/anonymous và chưa kiểm thử cả 8 điện thoại. Database và cấu hình GitHub Pages đã được triển khai. **Chưa thể tạo phòng MC cho tới khi cấp email được phép.**
+- **Chưa hoàn thành:** Chủ dự án chưa kích hoạt tài khoản MC và cần bật Anonymous Sign-Ins trong Supabase Authentication; chưa kiểm thử cả 8 điện thoại. Database và cấu hình GitHub Pages đã được triển khai. **Chưa thể tạo phòng MC cho tới khi kích hoạt tài khoản và bật đăng nhập ẩn danh.**
 
 ➡️ **[HƯỚNG DẪN KÍCH HOẠT SUPABASE FREE (không cần Google Cloud Billing)](./SUPABASE_SETUP.md)**
 

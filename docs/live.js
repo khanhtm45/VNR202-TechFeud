@@ -1,5 +1,5 @@
-import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js";
-import {supabaseConfig,isSupabaseConfigured} from "./supabase-config.js";
+import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=20261109-fix2";
+import {supabaseConfig,isSupabaseConfigured} from "./supabase-config.js?v=20261109-fix2";
 
 const $=id=>document.getElementById(id);
 const MODES=['host','player','board'];

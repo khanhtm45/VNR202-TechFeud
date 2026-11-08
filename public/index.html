@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1a0d23"><title>VNR202 · Hành trình Đổi mới</title>
+<style>
+:root{font-family:Inter,Arial,"Segoe UI",sans-serif;color:#fff4e4;background:#150d20;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 15%,#5e2739 0,transparent 45%),radial-gradient(circle at 85% 85%,#0c4a49 0,transparent 45%),#150d20}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(#ffffff05 1px,transparent 1px),linear-gradient(90deg,#ffffff05 1px,transparent 1px);background-size:40px 40px}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:1px solid #ffffff30;border-radius:12px;background:#39243e;color:#fff4e4;padding:11px 14px;font-weight:700;transition:.15s ease}button:hover:not(:disabled){background:#60405d;transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed}
+button.gold{background:linear-gradient(135deg,#f1d38a,#c38e44);color:#2b1427;border:0}button.green{background:#146b61}button.red{background:#873b50}button.ghost{background:#ffffff10}
+a{color:#f5d991;text-decoration:none}input,select,textarea{background:#24182e;color:#fff5e8;border:1px solid #ffffff38;border-radius:10px;padding:10px;min-width:0}textarea{width:100%;min-height:80px}
+main{position:relative;max-width:1440px;margin:auto;padding:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.brand small,.eyebrow{color:#ebc37e;font-weight:800;letter-spacing:.2em;text-transform:uppercase;font-size:11px}.brand h1{font-family:Georgia,serif;font-size:clamp(27px,3.5vw,52px);letter-spacing:.025em;margin:6px 0}.muted{color:#c9b7ca}.chip{border:1px solid #cda45b77;border-radius:999px;padding:10px 16px;color:#f2d391;background:#f8d99113;font-size:13px;font-weight:700}
+.panel{border:1px solid #ffffff20;background:#27172dbb;box-shadow:0 18px 60px #0005;border-radius:20px;padding:24px;backdrop-filter:blur(10px)}.hero{padding:clamp(30px,7vw,90px) 25px;text-align:center;max-width:960px;margin:10vh auto 0}
+.hero h2{font:700 clamp(40px,6vw,80px)/1.07 Georgia,serif;max-width:800px;margin:20px auto;background:linear-gradient(100deg,#fff0ce,#daa85d);background-clip:text;color:transparent}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.roundCard{border:1px solid #d6b17356;border-radius:16px;padding:25px 12px;margin-top:26px;background:#ffffff0a}.roundCard b{color:#e6c17e;font-size:30px;display:block}.roundCard span{display:block;margin-top:10px;font-weight:700}.buttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:28px 0}
+.scores{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch;margin:24px 0}.score{border:1px solid #ebc47755;border-radius:20px;padding:20px 10px;text-align:center;background:#3c253e}.score.b{background:#183c41;border-color:#3fb9a85b}.score .name{font-size:14px;letter-spacing:.07em;text-transform:uppercase;color:#d9bdce}.score .num{font-size:clamp(36px,5vw,65px);font-weight:900;font-variant-numeric:tabular-nums}.timer{text-align:center;display:flex;flex-direction:column;justify-content:center;padding:10px;color:#eac57e}.timer strong{font-size:clamp(29px,4vw,60px);font-variant-numeric:tabular-nums}
+.question{text-align:center;padding:28px 16px;border-radius:18px;background:#3f2845;border:1px solid #cfa9687d}.question small{color:#f3ce8c;font-weight:800;letter-spacing:.14em}.question h2{font-size:clamp(20px,2.7vw,38px);line-height:1.3;margin:16px 0}
+.answers{max-width:850px;margin:26px auto}.answer{display:grid;grid-template-columns:48px 1fr 60px;align-items:center;gap:14px;border:1px solid #ffffff28;border-radius:15px;background:#32263c;margin:12px 0;padding:12px 16px;min-height:68px}
+.answer.revealed{background:linear-gradient(100deg,#573747,#214d4b);border-color:#d8ae6d}.answer i{display:grid;place-items:center;background:#d6a963;color:#2a1630;border-radius:10px;width:44px;height:44px;font-style:normal;font-weight:900}.answer strong{font-size:clamp(15px,2vw,24px)}.answer em{color:#e8cc8d;text-align:right;font-style:normal;font-size:22px;font-weight:900}
+.reveal{color:#f3d493;text-align:center;font-size:22px;font-weight:800;border:1px dashed #f4d6966e;border-radius:15px;padding:25px;margin:28px 0;min-height:80px}.picture{font-size:110px;text-align:center;padding:14px}.strike{font-size:35px;letter-spacing:10px;color:#ff8f9c;text-align:center}
+.host{display:grid;grid-template-columns:270px 1fr;gap:18px;margin-top:22px}.side{display:flex;flex-direction:column;gap:10px;align-self:start}.side button{text-align:left}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.host h2{margin-top:0}.group{border-top:1px solid #ffffff25;padding-top:18px;margin-top:18px}.success{color:#a2e6d0}.error{color:#ffa8ba}.side .note{font-size:12px;color:#c5b2c8}.mini{font-size:12px}.list{display:flex;flex-direction:column;gap:8px}.list button{text-align:left;white-space:normal}
+.footer{text-align:center;padding:28px;color:#b99fac;font-size:12px}.hide{display:none!important}
+@media(max-width:770px){.grid3{grid-template-columns:1fr}.host{grid-template-columns:1fr}.scores{grid-template-columns:1fr 95px 1fr;gap:5px}.score{padding:10px 5px}.score .name{font-size:10px}.timer strong{font-size:27px}main{padding:14px}.panel{padding:16px}.hero{margin-top:3vh}.picture{font-size:75px}}
+</style></head><body>
+<main>
+<header class="top"><div class="brand"><small>VNR202 · Lịch sử Đảng Cộng sản Việt Nam</small><h1>HÀNH TRÌNH ĐỔI MỚI</h1><div class="muted">Dấu ấn Đại hội XI – XII · Khát vọng Việt Nam xanh</div></div><div id="connection" class="chip">Đang kết nối…</div></header>
+<section id="home" class="hero panel hide">
+<div class="eyebrow">Gameshow · 3 vòng thi đấu</div><h2>Kiến thức lịch sử, trách nhiệm hôm nay</h2>
+<p class="muted">Tìm hiểu Đại hội XI (2011), Đại hội XII (2016) và cùng đề xuất giải pháp bảo vệ môi trường, ứng phó biến đổi khí hậu.</p>
+<div class="grid3"><div class="roundCard"><b>01</b><span>Dấu mốc lịch sử</span></div><div class="roundCard"><b>02</b><span>Giải mã Đại hội</span></div><div class="roundCard"><b>03</b><span>Việt Nam xanh</span></div></div>
+<div class="buttons"><a href="/board.html"><button class="gold">Mở màn hình chiếu ↗</button></a><a href="/host.html"><button>Điều khiển MC ↗</button></a></div></section>
+<section id="board" class="hide">
+<div class="scores"><div class="score"><div class="name" id="aName">Đội A</div><div class="num" id="aScore">0</div></div><div class="timer"><span class="eyebrow" id="stageName">Vòng thi</span><strong id="clock">00:00</strong><span class="mini" id="progress">Sẵn sàng</span></div><div class="score b"><div class="name" id="bName">Đội B</div><div class="num" id="bScore">0</div></div></div>
+<div class="panel question"><small id="roundBadge">SẴN SÀNG</small><h2 id="questionText">Chào mừng đến với VNR202!</h2></div>
+<div id="picture" class="picture hide"></div><p id="hint" class="muted" style="text-align:center"></p><div id="answerArea" class="answers"></div><div id="strikes" class="strike"></div>
+<div class="footer">HÀNH TRÌNH ĐỔI MỚI · VNR202</div></section>
+<section id="host" class="host hide">
+<aside class="panel side"><h2>🎛️ Điều khiển MC</h2>
+<label>Mã PIN MC <input id="pin" type="password" placeholder="Nhập PIN" style="width:100%"></label><button class="gold" id="connectBtn">Mở khóa MC</button><div class="note">PIN mặc định trên máy cá nhân: 2026. Đặt HOST_PIN khác trước khi mở mạng.</div>
+<div class="group"><strong>Chọn vòng chơi</strong></div><button data-stage="rapid">⚡ 01 · Dấu mốc lịch sử</button><button data-stage="feud">🧩 02 · Giải mã Đại hội</button><button data-stage="green">🌿 03 · Việt Nam xanh</button><button data-type="finish">🏆 Công bố kết quả</button>
+<div class="group"><a href="/board.html" target="_blank">↗ Mở màn hình trình chiếu</a></div>
+</aside>
+<div class="panel"><div class="eyebrow">Bảng điều khiển</div><h2 id="hostTitle">Nhập mã PIN để bắt đầu</h2><div id="notice" class="muted">MC là người quyết định câu trả lời đúng hoặc sai.</div>
+<div id="controls" class="hide">
+<div class="group"><div class="row"><input id="nameA" placeholder="Tên đội A"><input id="nameB" placeholder="Tên đội B"><button id="setNames">Lưu tên đội</button></div></div>
+<div class="group"><div class="row"><button data-type="start" class="green">▶ Bắt đầu</button><button data-type="newGame" class="red">↺ Trò chơi mới</button><button data-type="next" class="gold">Câu tiếp theo →</button></div></div>
+<div class="group"><h3>Danh sách câu hỏi</h3><div id="questionList" class="list"></div></div>
+<div class="group"><h3 id="hostQuestion">Chưa bắt đầu</h3><div id="hostAnswer" class="muted"></div><div class="actions" id="revealControls"></div></div>
+<div class="group"><h3>Đồng hồ &amp; điểm</h3><div class="row"><button data-type="timerStart">▶ Chạy giờ</button><button data-type="timerPause">Ⅱ Tạm dừng</button><button data-type="timerReset">↺ Đặt lại</button></div><div class="actions"><button data-team="A" data-type="award" class="green">+ Điểm đội A</button><button data-team="B" data-type="award" class="green">+ Điểm đội B</button><button data-type="wrong" class="red">✕ Trả lời sai</button><button data-type="clearStrikes">Xóa dấu sai</button></div><div class="row"><button data-team="A" data-type="adjustScore" data-amount="10">A +10</button><button data-team="A" data-type="adjustScore" data-amount="-10">A −10</button><button data-team="B" data-type="adjustScore" data-amount="10">B +10</button><button data-team="B" data-type="adjustScore" data-amount="-10">B −10</button></div></div>
+</div></div></section>
+</main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const mode=location.pathname.includes('host')?'host':location.pathname.includes('board')?'board':'home';
+$(mode).classList.remove('hide');
+let state=null,bank=null,pin=sessionStorage.getItem('vnr202-pin')||'',lastStage='',lastIndex=-1;
+function text(id,value){const e=$(id);if(e)e.textContent=value??'';}
+function el(tag,cls,value){const e=document.createElement(tag);if(cls)e.className=cls;if(value!==undefined)e.textContent=value;return e;}
+function seconds(ms){let sec=Math.max(0,Math.ceil((ms||0)/1000));return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');}
+async function post(url,payload={}){
+ const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-host-pin':pin},body:JSON.stringify(payload)});
+ const value=await response.json();if(!response.ok)throw Error(value.error||'Thao tác thất bại');return value;
+}
+async function action(payload){try{const next=await post('/api/action',payload);render(next);notice('Đã cập nhật.');}catch(e){notice(e.message,true)}}
+function notice(message,error=false){text('notice',message);$('notice')?.classList.toggle('error',error);}
+function render(s){
+ state=s; if(mode==='home')return;
+ text('aName',s.teamA.name);text('aScore',s.teamA.score);text('bName',s.teamB.name);text('bScore',s.teamB.score);
+ const labels={lobby:'Sẵn sàng',rapid:'Vòng 1',feud:'Vòng 2',green:'Vòng 3',finale:'Chung cuộc'};
+ text('stageName',labels[s.stage]);text('clock',seconds(s.remainingMs));text('progress',s.total?'Câu '+(s.index+1)+' / '+s.total:'');
+ text('roundBadge',({rapid:'DẤU MỐC LỊCH SỬ',feud:'GIẢI MÃ ĐẠI HỘI',green:'THỬ THÁCH VIỆT NAM XANH'})[s.stage]||labels[s.stage]);
+ text('questionText',s.question?.question||(s.stage==='finale'?'🏆 Chúc mừng '+(s.teamA.score===s.teamB.score?'hai đội!':s.teamA.score>s.teamB.score?s.teamA.name:s.teamB.name)+'!':'Chào mừng đến với VNR202!'));
+ $('picture').classList.toggle('hide',s.stage!=='green');text('picture',s.question?.image||'🌿');text('hint',s.question?.hint||'');
+ const area=$('answerArea');area.replaceChildren();
+ if(s.stage==='feud'&&s.question){
+  s.question.answers.forEach((a,i)=>{const r=el('div','answer'+(a.revealed?' revealed':''));r.append(el('i','',i+1),el('strong','',a.revealed?a.text:'••••••••••••••'),el('em','',a.revealed?a.points:''));area.append(r);});
+ } else if(s.question?.answer){area.append(el('div','reveal',s.question.answer));}
+ else if(s.question&&s.stage!=='feud'){area.append(el('div','reveal','❓ ĐÁP ÁN ĐANG ĐƯỢC GIỮ BÍ MẬT'));}
+ text('strikes',s.stage==='feud'?'✕ '.repeat(s.strikes):'');
+ if(mode==='host'&&bank){
+  text('hostTitle',labels[s.stage]+' · '+(s.question?.id||'Sẵn sàng'));
+  text('hostQuestion',s.question?.question||'Chọn vòng để bắt đầu');
+  text('hostAnswer',(bank.rounds?.[s.stage]?.[s.index]?.answer)||'');
+  $('nameA').value=s.teamA.name;$('nameB').value=s.teamB.name;
+  const rev=$('revealControls');rev.replaceChildren();
+  if(s.stage==='feud'&&s.question) s.question.answers.forEach((a,i)=>{const b=el('button',a.revealed?'ghost':'gold',a.revealed?'✓ Đã mở '+(i+1):'Mở ô '+(i+1));b.disabled=a.revealed;b.onclick=()=>action({type:'reveal',index:i});rev.append(b);});
+  else if(s.question){const b=el('button','gold',s.question.answer?'✓ Đã công bố':'Hiện đáp án');b.disabled=Boolean(s.question.answer);b.onclick=()=>action({type:'reveal'});rev.append(b);}
+  const key=s.stage+':'+s.index;
+  if(key!==lastStage+':'+lastIndex){renderQuestionList(s.stage);lastStage=s.stage;lastIndex=s.index;}
+ }
+}
+function renderQuestionList(stage){const list=$('questionList');if(!list||!bank)return;list.replaceChildren();const qs=bank.rounds[stage]||[];qs.forEach((q,i)=>{const b=el('button','ghost',(i+1)+'. '+q.question);b.onclick=()=>action({type:'select',stage,index:i});list.append(b);});}
+async function unlock(){
+ pin=$('pin').value.trim();try{const data=await post('/api/host-state');bank=data.bank;sessionStorage.setItem('vnr202-pin',pin);$('controls').classList.remove('hide');render(data);notice('✓ Đã mở khóa MC.');}catch(e){notice(e.message,true);}
+}
+if(mode==='host'){
+ $('pin').value=pin;$('connectBtn').onclick=unlock;
+ document.querySelectorAll('[data-type]').forEach(b=>b.onclick=()=>action({type:b.dataset.type,...(b.dataset.team?{team:b.dataset.team}:{}),...(b.dataset.amount?{amount:Number(b.dataset.amount)}:{})}));
+ document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>action({type:'select',stage:b.dataset.stage,index:0}));
+ $('setNames').onclick=()=>action({type:'setNames',teamA:$('nameA').value,teamB:$('nameB').value});
+ if(pin)unlock();
+}
+fetch('/api/state').then(r=>r.json()).then(render).catch(()=>{});
+const evt=new EventSource('/api/events');
+evt.addEventListener('state',e=>{const s=JSON.parse(e.data);if(mode!=='host'||bank)render(s);});
+evt.onopen=()=>text('connection','● Trực tuyến');evt.onerror=()=>text('connection','○ Đang kết nối lại');
+setInterval(()=>{if(state?.running){const ms=state.remainingMs-(Date.now()-(window.lastReceived||Date.now()));text('clock',seconds(ms));}},300);
+evt.addEventListener('state',()=>{window.lastReceived=Date.now();});
+</script></body></html>

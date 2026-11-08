@@ -8,7 +8,7 @@ const STAGES={rapid:'Vòng 1 · Dấu mốc lịch sử',feud:'Vòng 2 · Giải
 const LETTERS=['A','B','C','D'];
 let mode=new URLSearchParams(location.search).get('mode')||'player';
 let code=(new URLSearchParams(location.search).get('code')||'').trim();
-let app,auth,db,functions,user,room,teams=[],privateQuestions=null;
+let app,auth,db,functions,user,room,teams=[],privateQuestions=null,hostAuthorized=false;
 let unRoom=null,unTeams=null,joinedCode='',selectedChoice=null,submitting=false,closingKey='',latestCursor=-1;
 let toastTimer=null;
 
@@ -39,6 +39,72 @@ function rankings(){return [...teams].sort((a,b)=>(b.score||0)-(a.score||0)||(a.
 function formatClock(ms){const total=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
 function remaining(){return room?.status==='question'?Math.max(0,(room.deadlineMs||0)-Date.now()):0;}
 function call(name,data){return httpsCallable(functions,name)(data).then(r=>r.data);}
+
+/* Host privilege is checked by a Supabase RPC. UI-only checks are not the security boundary:
+   vnr_create_room and vnr_control_room independently enforce the allowlist server-side. */
+function renderHostAccess(){
+  $('hostAuthPanel').hidden=hostAuthorized;
+  $('hostLayout').hidden=!hostAuthorized;
+  $('hostAuthStatus').hidden=!hostAuthorized;
+  if(hostAuthorized)showText('hostAuthIdentity','🔐 MC: '+(user?.email||'Tài khoản đã xác thực'));
+}
+async function checkHostAccess(){
+  hostAuthorized=false;
+  if(user&&!user.is_anonymous&&app){
+    try{
+      const {data,error}=await app.rpc('vnr_is_authorized_host');
+      if(error)throw error;
+      hostAuthorized=data===true;
+    }catch(err){notify('Không xác minh được quyền MC: '+err.message,true);}
+  }
+  renderHostAccess();
+  render();
+  return hostAuthorized;
+}
+async function hostSendOtp(){
+  const email=$('hostEmail').value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return notify('Nhập email MC hợp lệ.',true);
+  $('hostSendOtp').disabled=true;
+  try{
+    const redirect=new URL('./live.html?mode=host',location.href).toString();
+    const {error}=await app.auth.signInWithOtp({
+      email,options:{emailRedirectTo:redirect,shouldCreateUser:true}
+    });
+    if(error)throw error;
+    showText('hostAuthMessage','Đã gửi email đăng nhập. Hãy mở liên kết trong thư hoặc nhập mã OTP nếu thư có mã 6 chữ số.');
+    notify('Đã gửi email đăng nhập MC.');
+  }catch(err){notify('Lỗi gửi email: '+err.message,true);}
+  finally{$('hostSendOtp').disabled=false;}
+}
+async function hostVerifyOtp(){
+  const email=$('hostEmail').value.trim().toLowerCase();
+  const token=$('hostOtp').value.trim().replace(/\s/g,'');
+  if(!email||!/^\d{6,8}$/.test(token))return notify('Nhập email và mã OTP hợp lệ.',true);
+  $('hostVerifyOtp').disabled=true;
+  try{
+    const {data,error}=await app.auth.verifyOtp({email,token,type:'email'});
+    if(error)throw error;
+    user=data.user;
+    if(await checkHostAccess()){
+      notify('✓ Đăng nhập MC thành công.');
+      if(code)watchRoom(code);
+    }else{
+      showText('hostAuthMessage','Email đã xác thực nhưng chưa được người quản lý cho phép làm MC.');
+      notify('Email này chưa có quyền MC.',true);
+    }
+  }catch(err){notify('Không xác minh được mã: '+err.message,true);}
+  finally{$('hostVerifyOtp').disabled=false;}
+}
+async function hostSignOut(){
+  try{
+    await app.auth.signOut();
+    user=null;hostAuthorized=false;
+    stopListening();room=null;teams=[];
+    renderHostAccess();render();
+    notify('Đã đăng xuất MC.');
+  }catch(err){notify('Lỗi đăng xuất: '+err.message,true);}
+}
+
 function sanitizedCode(value){return String(value||'').replace(/\D/g,'').slice(0,6);}
 function setCode(value){
   code=sanitizedCode(value);
@@ -68,7 +134,7 @@ function watchRoom(value){
     if(room.expiresAtMs&&room.expiresAtMs<Date.now())notify('Phòng đã hết hạn.',true);
     if(latestCursor!==room.cursor){selectedChoice=null;latestCursor=room.cursor;}
     render();
-  },err=>{setConnection('Mất kết nối Firestore');notify('Không đọc được phòng: '+err.message,true);});
+  },err=>{setConnection('Mất kết nối Supabase');notify('Không đọc được phòng: '+err.message,true);});
   unTeams=onSnapshot(collection(db,'rooms',next,'teams'),snapshot=>{
     teams=snapshot.docs.map(d=>({uid:d.id,...d.data()}));
     render();
@@ -119,9 +185,9 @@ function renderQuestion(target,interactive=false){
 function renderHost(){
   renderTeams('hostTeams');
   showText('teamCount',teams.length+'/8 đội');
-  const host=room?.hostUid===user?.uid;
+  const host=hostAuthorized&&room?.hostUid===user?.uid;
   $('hostRoomCard').hidden=!room||!host;
-  $('createRoom').disabled=!privateQuestions||!user;
+  $('createRoom').disabled=!privateQuestions||!user||!hostAuthorized;
   if(room&&host){
     showText('hostRoomCode',code);
     if($('qrImage').dataset.code!==code){$('qrImage').dataset.code=code;renderQr();}
@@ -184,6 +250,7 @@ function renderBoard(){
   }
 }
 function render(){
+  renderHostAccess();
   if(!room&&mode==='host')showText('hostStatus','Chưa tạo phòng');
   renderHost();renderPlayer();renderBoard();
   updateClocks();
@@ -204,6 +271,7 @@ async function submitChoice(index){
   }finally{submitting=false;render();}
 }
 async function control(action){
+  if(!hostAuthorized)return notify('Chỉ MC được cấp quyền mới có thể điều khiển.',true);
   if(!room)return notify('Chưa có phòng.',true);
   try{
     const result=await call('controlGame',{code,action});
@@ -225,6 +293,7 @@ function updateClocks(){
   if(mode==='player'&&room?.status==='question'&&time===0)renderQuestion('playerChoices',true);
 }
 async function createRoom(){
+  if(!hostAuthorized)return notify('Bạn chưa có quyền tạo phòng MC.',true);
   if(!privateQuestions)return notify('Hãy chọn bộ câu hỏi JSON trước.',true);
   $('createRoom').disabled=true;
   try{
@@ -255,12 +324,18 @@ async function loadQuestions(file){
     privateQuestions=json;
     const stages=['rapid','feud','green'];
     showText('fileSummary','✓ Đã nạp '+json.length+' câu: '+stages.map(stage=>json.filter(x=>x.stage===stage).length).join(' / ')+' (vòng 1 / 2 / 3).');
-    $('createRoom').disabled=!user;
+    $('createRoom').disabled=!user||!hostAuthorized;
   }catch(err){privateQuestions=null;showText('fileSummary','Không đọc được tệp: '+err.message);notify(err.message,true);}
 }
 function wire(){
-  document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>displayMode(b.dataset.mode)));
+  document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',async()=>{
+    displayMode(b.dataset.mode);
+    if(b.dataset.mode==='host'&&user&&!user.is_anonymous&&!hostAuthorized)await checkHostAccess();
+  }));
   $('createRoom').onclick=createRoom;
+  $('hostSendOtp').onclick=hostSendOtp;
+  $('hostVerifyOtp').onclick=hostVerifyOtp;
+  $('hostSignOut').onclick=hostSignOut;
   $('questionUpload').addEventListener('change',e=>loadQuestions(e.target.files[0]));
   $('joinRoom').onclick=joinRoom;
   $('resumeHost').onclick=()=>watchRoom($('hostCode').value);
@@ -297,12 +372,17 @@ async function init(){
   app=initializeApp(supabaseConfig);
   auth=getAuth(app);db=getFirestore(app);functions=getFunctions(app);
   const existing=await new Promise(resolve=>{const unsubscribe=onAuthStateChanged(auth,u=>{unsubscribe();resolve(u);},()=>resolve(null));});
-  user=existing||(await signInAnonymously(auth)).user;
+  // Do not create an anonymous session for MC. Email-verified account is required.
+  user=existing||(mode==='host'?null:(await signInAnonymously(auth)).user);
   setConnection('✓ Đã kết nối Supabase • '+MODE_LABELS[mode],true);
   $('joinRoom').disabled=false;$('watchBoard').disabled=false;
-  if(mode==='host'&&!code)code=readLocal('vnr202-host-code');
+  if(mode==='host'){
+    if(!code)code=readLocal('vnr202-host-code');
+    if(user&&!user.is_anonymous)await checkHostAccess();
+    else renderHostAccess();
+  }
   if(mode==='player'&&!code)code=readLocal('vnr202-joined-code');
-  if(code){
+  if(code&&(mode!=='host'||hostAuthorized)){
     if(mode==='board'){
       try{await call('authorizeSpectator',{code});watchRoom(code);}
       catch(err){notify(err.message||'Không thể xem phòng.',true);render();}

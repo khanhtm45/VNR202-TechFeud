@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>VNR202 • Hành trình Đổi mới</title><style>
+:root{font-family:Inter,system-ui,Arial,sans-serif;background:#150e20;color:#f9f0e9}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 15% 0%,#692c45 0,transparent 44%),radial-gradient(ellipse at 90% 100%,#105e58 0,transparent 43%),#150e20}
+main{max-width:1200px;padding:24px;margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.eyebrow{font-size:12px;letter-spacing:3px;color:#f3cd89;text-transform:uppercase;font-weight:800}
+h1{font:700 clamp(29px,4.5vw,58px) Georgia,serif;margin:8px 0}h2{font-size:clamp(19px,2.4vw,31px);line-height:1.35}h3{margin:0 0 12px}small,p{color:#d6c3d3}
+a{color:#ffe4a4}button{border:1px solid #ffffff30;border-radius:11px;color:#f9f0e9;background:#3a2745;padding:12px 16px;font:700 14px system-ui;cursor:pointer}
+button:hover{filter:brightness(1.25)}button:disabled{opacity:.45;cursor:not-allowed}button.gold{color:#2f1d28;background:linear-gradient(125deg,#ffdf98,#d6a454);border:none}button.green{background:#146a5b}button.red{background:#7e324b}
+nav{display:flex;gap:9px;flex-wrap:wrap}nav button.active{border-color:#ffd58b;color:#ffd58b}
+.card{border:1px solid #ffffff27;background:#271a34e8;box-shadow:0 20px 55px #0004;border-radius:20px;padding:clamp(17px,3vw,32px)}
+.hero{text-align:center;margin-top:8vh;padding:clamp(35px,7vw,85px) 20px}
+.hero h2{font:700 clamp(37px,7vw,82px)/1.08 Georgia,serif;max-width:850px;margin:25px auto;color:#f6dfac}
+.rounds{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:24px 0}.rounds>div{background:#ffffff0d;border:1px solid #ebbd7f55;border-radius:13px;padding:18px}.rounds b{color:#f1cb82;font-size:30px;display:block;margin-bottom:8px}
+.buttons{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin:24px 0}
+.scores{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;margin:23px 0}
+.score{text-align:center;background:#482a48;border:1px solid #c9a16466;border-radius:17px;padding:14px}.score.b{background:#1a4744}.score b{display:block;font-size:clamp(38px,6vw,68px);font-variant-numeric:tabular-nums}.score span{font-size:13px;color:#ddc6d6}
+.middle{display:flex;align-items:center;flex-direction:column;justify-content:center;color:#f5d089;font-size:14px}.middle strong{font-size:clamp(29px,4vw,52px);font-variant-numeric:tabular-nums}
+.question{text-align:center;background:#3c2744;border:1px solid #e5b56d77;border-radius:16px;padding:26px 15px}.question h2{margin:10px 0}.answers{max-width:900px;margin:24px auto}
+.answer{display:grid;grid-template-columns:44px 1fr 60px;gap:13px;align-items:center;background:#32283e;border:1px solid #ffffff30;border-radius:12px;padding:12px;margin:9px 0;min-height:66px}
+.answer.on{background:linear-gradient(90deg,#65404e,#245453)}.answer i{background:#d7ae6c;color:#2a1930;border-radius:9px;height:40px;display:grid;place-items:center;font-weight:900;font-style:normal}.answer b{font-size:clamp(15px,2.2vw,23px)}.answer em{color:#f6d38c;text-align:right;font-style:normal;font-weight:900}
+.revealed{padding:24px;margin:18px auto;text-align:center;color:#f4db9f;font-size:22px;font-weight:800;border:1px dashed #e5b672aa;border-radius:15px}
+.illustration{text-align:center;font-size:110px;margin:8px}.strike{text-align:center;color:#ff9bab;font-size:30px;letter-spacing:12px}
+#controlPanel{display:grid;grid-template-columns:230px 1fr;gap:18px;margin-top:22px}.sidebar{display:flex;flex-direction:column;gap:9px;align-self:start}.sidebar button{text-align:left}
+.row{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:12px 0}input{font:inherit;color:#fff4eb;background:#201527;border:1px solid #ffffff55;border-radius:10px;padding:10px;max-width:200px}
+hr{border:0;border-top:1px solid #ffffff26;margin:19px 0}.muted{color:#cfbfcc}.caption{font-size:12px;color:#cdbacb}.list{display:flex;flex-direction:column;gap:8px}.list button{text-align:left;white-space:normal}
+.hidden{display:none!important}footer{text-align:center;padding:35px 0;color:#bfaac3;font-size:12px}
+@media(max-width:720px){.rounds{grid-template-columns:1fr}.scores{grid-template-columns:1fr 82px 1fr;gap:5px}.score{padding:10px 3px}.score span{font-size:10px}.middle strong{font-size:26px}#controlPanel{grid-template-columns:1fr}main{padding:12px}.illustration{font-size:70px}}
+</style></head><body><main>
+<header><div><div class="eyebrow">VNR202 • Lịch sử Đảng Cộng sản Việt Nam</div><h1>HÀNH TRÌNH ĐỔI MỚI</h1><small>Đại hội XI (2011) • Đại hội XII (2016) • Việt Nam xanh</small></div><nav><button data-view="home">Trang chủ</button><button data-view="board">Máy chiếu</button><button data-view="host">Điều khiển MC</button></nav></header>
+<section id="home" class="card hero hidden"><div class="eyebrow">Gameshow học tập • 3 vòng chơi</div><h2>Kiến thức lịch sử, trách nhiệm hôm nay</h2><p>Từ những dấu mốc đổi mới đến giải pháp bảo vệ môi trường và thích ứng biến đổi khí hậu.</p>
+<div class="rounds"><div><b>01</b>Dấu mốc lịch sử</div><div><b>02</b>Giải mã Đại hội</div><div><b>03</b>Việt Nam xanh</div></div>
+<div class="buttons"><button class="gold" data-view="board">Mở màn hình máy chiếu</button><button data-view="host">Mở bảng điều khiển MC</button></div>
+<p class="caption">Phiên bản GitHub Pages hoạt động ngay trên trình duyệt, không cần Node.js.</p></section>
+<section id="board" class="hidden"><div class="scores"><div class="score"><span id="aName">Đội A</span><b id="aScore">0</b></div><div class="middle"><span id="stageLabel">SẴN SÀNG</span><strong id="clock">00:00</strong><span id="progress"></span></div><div class="score b"><span id="bName">Đội B</span><b id="bScore">0</b></div></div>
+<div class="question"><div class="eyebrow" id="roundName">VNR202</div><h2 id="question">Chào mừng các đội thi!</h2></div><div class="illustration" id="image"></div><p class="muted" style="text-align:center" id="hint"></p><div class="answers" id="answers"></div><div class="strike" id="strikes"></div></section>
+<section id="host" class="hidden"><div id="controlPanel"><aside class="card sidebar"><h3>🎛️ Bảng MC</h3><button data-stage="rapid">⚡ Vòng 1 — Lịch sử</button><button data-stage="feud">🧩 Vòng 2 — Giải mã</button><button data-stage="green">🌿 Vòng 3 — Việt Nam xanh</button><button data-action="finish">🏆 Công bố kết quả</button><hr><button data-view="board">Mở bảng thi đấu</button><p class="caption">Mở 2 tab trong cùng một trình duyệt để điều khiển và trình chiếu.</p></aside>
+<div class="card"><div class="eyebrow">Bảng điều khiển trực tiếp</div><h2 id="hostTitle">Sẵn sàng bắt đầu</h2>
+<div class="row"><input id="nameA" placeholder="Tên đội A"><input id="nameB" placeholder="Tên đội B"><button id="saveNames">Lưu tên đội</button></div><hr>
+<div class="row"><button class="green" data-action="start">▶ Bắt đầu</button><button data-action="next" class="gold">Câu tiếp theo →</button><button data-action="reset" class="red">↺ Trò chơi mới</button></div>
+<div id="questions" class="list"></div><hr><h3 id="hostQuestion"></h3><p id="hostAnswer" class="muted"></p><div id="revealBtns" class="row"></div><hr>
+<div class="row"><button data-action="timerStart">▶ Chạy giờ</button><button data-action="timerPause">Ⅱ Tạm dừng</button><button data-action="timerReset">↺ Đặt giờ</button></div>
+<div class="row"><button class="green" data-award="A">+ Điểm đội A</button><button class="green" data-award="B">+ Điểm đội B</button><button data-action="wrong" class="red">✕ Sai</button><button data-action="clearStrikes">Xóa lỗi</button></div>
+<div class="row"><button data-adjust="A:10">A +10</button><button data-adjust="A:-10">A −10</button><button data-adjust="B:10">B +10</button><button data-adjust="B:-10">B −10</button></div>
+<p class="caption" id="notice">Mỗi câu chỉ được trao điểm một lần.</p></div></div></section>
+<footer>VNR202 · Hành trình Đổi mới · Phiên bản GitHub Pages</footer>
+</main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id),KEY='vnr202-pages-v1', CHANNEL='vnr202-sync';
+const views=['home','board','host'],stages=['rapid','feud','green'];
+let bank=null,channel=null;
+try{channel=new BroadcastChannel(CHANNEL);}catch{}
+function fresh(){return {stage:'lobby',index:0,teamA:{name:'Đội Đổi Mới',score:0},teamB:{name:'Đội Việt Nam Xanh',score:0},slots:[],revealed:false,strikes:0,roundPoints:0,awards:{},deadline:0,remainingMs:0,running:false};}
+function read(){try{return {...fresh(),...JSON.parse(localStorage.getItem(KEY))};}catch{return fresh();}}
+let s=read(),view=new URLSearchParams(location.search).get('view')||'home';
+function current(){return bank?.rounds[s.stage]?.[s.index]||null;}
+function remaining(){return s.running?Math.max(0,s.deadline-Date.now()):s.remainingMs;}
+function save(){localStorage.setItem(KEY,JSON.stringify(s));channel?.postMessage('change');render();}
+function msg(message){const el=$('notice');if(el)el.textContent=message;}
+function choose(stage,index){if(!stages.includes(stage)||!bank.rounds[stage]?.[index])throw Error('Câu hỏi không hợp lệ');const q=bank.rounds[stage][index];Object.assign(s,{stage,index,slots:[],revealed:false,strikes:0,roundPoints:0,running:false,deadline:0,remainingMs:q.duration*1000});}
+function act(type,arg){
+ try{const q=current();
+ if(type==='start')choose('rapid',0);
+ else if(type==='select')choose(arg.stage,arg.index);
+ else if(type==='reset'){if(!confirm('Xóa điểm và bắt đầu lại?'))return;const a=s.teamA.name,b=s.teamB.name;s=fresh();s.teamA.name=a;s.teamB.name=b;}
+ else if(type==='next'){if(!q)throw Error('Chưa bắt đầu');if(bank.rounds[s.stage][s.index+1])choose(s.stage,s.index+1);else{const next=stages[stages.indexOf(s.stage)+1];if(next)choose(next,0);else{s.stage='finale';s.running=false;}}}
+ else if(type==='finish'){s.stage='finale';s.running=false;}
+ else if(type==='reveal'){if(!q)throw Error('Chưa có câu hỏi');if(s.stage==='feud'){const i=arg.index;if(s.slots.includes(i))throw Error('Ô đã mở');s.slots.push(i);s.roundPoints+=q.answers[i].points;}else s.revealed=true;}
+ else if(type==='wrong'){if(s.stage!=='feud')throw Error('Chỉ dùng ở vòng 2');s.strikes=Math.min(3,s.strikes+1);}
+ else if(type==='clearStrikes')s.strikes=0;
+ else if(type==='award'){if(!q)throw Error('Chưa có câu hỏi');if(s.awards[q.id])throw Error('Câu này đã trao điểm');if(s.stage!=='feud'&&!s.revealed)throw Error('Hãy mở đáp án trước');const pts=s.stage==='feud'?s.roundPoints:q.points;if(pts<=0)throw Error('Chưa có điểm');s[arg.team==='A'?'teamA':'teamB'].score+=pts;s.awards[q.id]=true;}
+ else if(type==='adjust'){s[arg.team==='A'?'teamA':'teamB'].score=Math.max(0,s[arg.team==='A'?'teamA':'teamB'].score+arg.amount);}
+ else if(type==='timerStart'){if(!q)throw Error('Chưa có câu hỏi');if(!s.running){s.deadline=Date.now()+s.remainingMs;s.running=true;}}
+ else if(type==='timerPause'){s.remainingMs=remaining();s.running=false;}
+ else if(type==='timerReset'){if(!q)throw Error('Chưa có câu hỏi');s.remainingMs=q.duration*1000;s.running=false;}
+ save();msg('✓ Đã cập nhật');
+ }catch(e){msg('⚠ '+e.message);}
+}
+function txt(id,value){const e=$(id);if(e)e.textContent=value??'';}
+function div(cls,text){const el=document.createElement('div');el.className=cls;if(text!=null)el.textContent=text;return el;}
+function show(viewName){view=views.includes(viewName)?viewName:'home';for(const v of views)$(v).classList.toggle('hidden',v!==view);document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));const u=new URL(location.href);u.searchParams.set('view',view);history.replaceState(null,'',u);render();}
+function render(){
+ const q=current(),lbl={lobby:'SẴN SÀNG',rapid:'VÒNG 1',feud:'VÒNG 2',green:'VÒNG 3',finale:'CHUNG CUỘC'};
+ txt('aName',s.teamA.name);txt('aScore',s.teamA.score);txt('bName',s.teamB.name);txt('bScore',s.teamB.score);txt('stageLabel',lbl[s.stage]);txt('clock',clock(remaining()));txt('progress',q?'Câu '+(s.index+1)+' / '+bank.rounds[s.stage].length:'');
+ txt('roundName',({rapid:'DẤU MỐC LỊCH SỬ',feud:'GIẢI MÃ ĐẠI HỘI',green:'THỬ THÁCH VIỆT NAM XANH'})[s.stage]||'HÀNH TRÌNH ĐỔI MỚI');
+ txt('question',q?.question||(s.stage==='finale'?'🏆 '+(s.teamA.score===s.teamB.score?'Hai đội hòa nhau!':'Chiến thắng thuộc về '+(s.teamA.score>s.teamB.score?s.teamA.name:s.teamB.name)+'!'):'Chào mừng đến với VNR202!'));
+ txt('image',s.stage==='green'?q?.image||'🌿':'');txt('hint',s.stage==='green'?q?.hint||'':'');
+ const out=$('answers');out.replaceChildren();
+ if(s.stage==='feud'&&q){q.answers.forEach((a,i)=>{const on=s.slots.includes(i),row=div('answer'+(on?' on':''));row.append(div('',''+(i+1)),div('',on?a.text:'••••••••••••••'),div('',on?a.points:''));out.append(row);});}
+ else if(q){out.append(div('revealed',s.revealed?q.answer:'❓ ĐÁP ÁN BÍ MẬT'));}
+ txt('strikes',s.stage==='feud'?'✕ '.repeat(s.strikes):'');
+ txt('hostTitle',lbl[s.stage]+' · '+(q?.id||'Sẵn sàng'));txt('hostQuestion',q?.question||'Chọn vòng để bắt đầu');txt('hostAnswer',q?.answer||'');
+ const rev=$('revealBtns');rev.replaceChildren();
+ if(s.stage==='feud'&&q){q.answers.forEach((a,i)=>{const b=document.createElement('button');b.textContent=s.slots.includes(i)?'✓ Ô '+(i+1):'Mở ô '+(i+1);b.disabled=s.slots.includes(i);b.onclick=()=>act('reveal',{index:i});rev.append(b);});}
+ else if(q){const b=document.createElement('button');b.textContent=s.revealed?'✓ Đã mở đáp án':'Mở đáp án';b.disabled=s.revealed;b.onclick=()=>act('reveal');rev.append(b);}
+ if(s._renderListFor!==s.stage){const list=$('questions');list.replaceChildren();(bank?.rounds[s.stage]||[]).forEach((it,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'. '+it.question;b.onclick=()=>act('select',{stage:s.stage,index:i});list.append(b);});s._renderListFor=s.stage;}
+}
+function clock(ms){const v=Math.max(0,Math.ceil((ms||0)/1000));return String(Math.floor(v/60)).padStart(2,'0')+':'+String(v%60).padStart(2,'0');}
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
+document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>act('select',{stage:b.dataset.stage,index:0}));
+document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>act(b.dataset.action));
+document.querySelectorAll('[data-award]').forEach(b=>b.onclick=()=>act('award',{team:b.dataset.award}));
+document.querySelectorAll('[data-adjust]').forEach(b=>b.onclick=()=>{const [team,amount]=b.dataset.adjust.split(':');act('adjust',{team,amount:Number(amount)});});
+$('saveNames').onclick=()=>{s.teamA.name=$('nameA').value.trim().slice(0,30)||s.teamA.name;s.teamB.name=$('nameB').value.trim().slice(0,30)||s.teamB.name;save();};
+channel&&(channel.onmessage=()=>{s=read();s._renderListFor=null;render();});
+window.addEventListener('storage',e=>{if(e.key===KEY){s=read();s._renderListFor=null;render();}});
+setInterval(()=>{if(s.running){txt('clock',clock(remaining()));if(remaining()<=0){s.running=false;s.remainingMs=0;save();}}},250);
+fetch('./questions.json').then(r=>{if(!r.ok)throw Error('Không tải được câu hỏi');return r.json()}).then(data=>{bank=data;show(view);$('nameA').value=s.teamA.name;$('nameB').value=s.teamB.name;}).catch(e=>{document.body.append(div('revealed','Lỗi: '+e.message));});
+</script></body></html>

@@ -135,8 +135,8 @@ begin
     if v_choices is null or jsonb_typeof(v_choices)<>'array' or jsonb_array_length(v_choices)<>4 then
       raise exception 'Mỗi câu phải có đúng 4 đáp án lựa chọn.';
     end if;
-    if (select count(distinct lower(trim(x))) from jsonb_array_elements_text(v_choices) x)<>4
-       or exists(select 1 from jsonb_array_elements_text(v_choices) x where char_length(trim(x)) not between 1 and 200)
+    if (select count(distinct lower(trim(c.choice))) from jsonb_array_elements_text(v_choices) as c(choice))<>4
+       or exists(select 1 from jsonb_array_elements_text(v_choices) as c(choice) where char_length(trim(c.choice)) not between 1 and 200)
     then raise exception 'Các đáp án phải có nội dung khác nhau.'; end if;
     if coalesce(v_q->>'correctIndex','') !~ '^[0-3]$' then
       raise exception 'Đáp án đúng phải là số 0–3.';

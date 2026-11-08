@@ -128,7 +128,7 @@ function renderQr(){
   const link=joinLink();
   for(const [id,size] of [['qrImage',320],['boardQRImage',392]]){
     const img=$(id);
-    if(!img||img.dataset.code===code)return;
+    if(!img||img.dataset.code===code)continue;
     img.dataset.code=code;
     img.dataset.backup='';
     img.onerror=()=>{

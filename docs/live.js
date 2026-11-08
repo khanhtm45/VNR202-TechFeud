@@ -7,7 +7,9 @@ const MODE_LABELS={host:'MC',player:'Đội chơi',board:'Máy chiếu'};
 const STAGES={rapid:'Vòng 1 · Dấu mốc lịch sử',feud:'Vòng 2 · Giải mã Đại hội',green:'Vòng 3 · Việt Nam xanh'};
 const LETTERS=['A','B','C','D'];
 let mode=new URLSearchParams(location.search).get('mode')||'player';
-let code=(new URLSearchParams(location.search).get('code')||'').trim();
+// The Supabase email magic-link may also use ?code=PKCE_TOKEN. Only six digits are a room code.
+const urlCode=(new URLSearchParams(location.search).get('code')||'').trim();
+let code=/^\d{6}$/.test(urlCode)?urlCode:'';
 let app,auth,db,functions,user,room,teams=[],privateQuestions=null,hostAuthorized=false;
 let unRoom=null,unTeams=null,joinedCode='',selectedChoice=null,submitting=false,closingKey='',latestCursor=-1;
 let toastTimer=null;
@@ -376,6 +378,12 @@ async function init(){
   app=initializeApp(supabaseConfig);
   auth=getAuth(app);db=getFirestore(app);functions=getFunctions(app);
   const existing=await new Promise(resolve=>{const unsubscribe=onAuthStateChanged(auth,u=>{unsubscribe();resolve(u);},()=>resolve(null));});
+  // Clear consumed auth callback tokens, never misinterpret them as room codes.
+  if(urlCode&&!/^\d{6}$/.test(urlCode)){
+    const clean=new URL(location.href);
+    clean.searchParams.delete('code');
+    history.replaceState({},'',clean.pathname+clean.search+clean.hash);
+  }
   // Do not create an anonymous session for MC. Email-verified account is required.
   user=existing||(mode==='host'?null:(await signInAnonymously(auth)).user);
   setConnection('✓ Đã kết nối Supabase • '+MODE_LABELS[mode],true);

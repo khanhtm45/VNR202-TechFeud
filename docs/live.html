@@ -34,12 +34,30 @@
   <main>
     <section id="hostScreen" class="live-screen" hidden>
       <div class="live-heading"><span class="live-kicker">DÀNH CHO NGƯỜI ĐIỀU KHIỂN</span><h2>Điều khiển gameshow</h2><p>MC tạo phòng, chọn bộ câu hỏi riêng và điều phối các vòng thi.</p></div>
-      <div class="host-layout">
+      <div id="hostAuthPanel" class="live-panel host-auth-panel">
+        <h3>🔐 Đăng nhập tài khoản MC</h3>
+        <p>Chỉ email MC đã được cấp quyền mới có thể tạo hoặc điều khiển phòng. Link website không cấp quyền điều khiển.</p>
+        <label class="field-label" for="hostEmail">Email MC được cho phép</label>
+        <input id="hostEmail" type="email" placeholder="mc@example.com" autocomplete="email" inputmode="email">
+        <div class="live-actions host-auth-actions">
+          <button id="hostSendOtp" class="live-button primary" type="button">Gửi email đăng nhập</button>
+        </div>
+        <label class="field-label" for="hostOtp">Mã xác minh 6 số (nếu email có mã)</label>
+        <input id="hostOtp" type="text" inputmode="numeric" maxlength="8" autocomplete="one-time-code" placeholder="Nhập mã từ email">
+        <button id="hostVerifyOtp" type="button" class="live-button">Xác nhận mã MC</button>
+        <p id="hostAuthMessage" class="field-help" role="status">Bạn sẽ nhận email chứa liên kết hoặc mã xác minh. Không chia sẻ email/mã cho các đội.</p>
+        <p class="field-help">Nếu email chứa liên kết đăng nhập, hãy mở liên kết trên cùng trình duyệt. Địa chỉ trang MC phải được thêm vào Supabase Auth URL Configuration.</p>
+      </div>
+      <div id="hostAuthStatus" class="host-auth-status" hidden>
+        <span id="hostAuthIdentity">Đã đăng nhập MC</span>
+        <button id="hostSignOut" class="live-button" type="button">Đăng xuất MC</button>
+      </div>
+      <div id="hostLayout" class="host-layout" hidden>
         <aside class="live-panel host-setup">
           <h3>01. Tạo phòng thi</h3>
           <label class="field-label" for="questionUpload">Bộ câu hỏi có đáp án (tệp riêng tư JSON)</label>
           <input id="questionUpload" type="file" accept=".json,application/json">
-          <p class="field-help">Không đăng tệp đáp án lên GitHub. Đáp án chỉ được gửi lên Firebase khi MC tạo phòng.</p>
+          <p class="field-help">Không đăng tệp đáp án lên GitHub. Đáp án chỉ được gửi lên Supabase khi MC tạo phòng.</p>
           <p id="fileSummary" class="live-muted">Chưa chọn bộ câu hỏi.</p>
           <button id="createRoom" type="button" class="live-button primary" disabled>Tạo phòng & mã tham gia</button>
           <div class="live-divider"></div>

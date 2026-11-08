@@ -91,3 +91,36 @@ test('MC requires private hashed credentials and time-limited server sessions',(
  assert.ok(!frontend.includes('040503'),'MC password never appears in JavaScript');
  assert.ok(!sql.includes('040503'),'MC password never appears in public migration');
 });
+
+
+test('Tất cả 20 câu đều có SVG gốc, banner và QR ở cả MC/máy chiếu',()=>{
+ const root=path.join(__dirname,'../docs');
+ const files=['r1','r2','r3','r4','r5','r6','r7','r8','f1','f2','f3','f4','f5','f6','g1','g2','g3','g4','g5','g6'];
+ assert.equal(files.length,20);
+ for(const id of files){
+   const file=path.join(root,'art/questions',id+'.svg');
+   const content=fs.readFileSync(file,'utf8');
+   assert.match(content,/<svg\s/);
+   assert.match(content,/<\/svg>\s*$/);
+   assert.ok(!content.includes('correctIndex'),'Không được lộ đáp án trong hình');
+ }
+ for(const stage of ['rapid','feud','green']){
+   const file=path.join(root,'art/banners',stage+'.svg');
+   assert.match(fs.readFileSync(file,'utf8'),/<svg\s/);
+ }
+ const html=fs.readFileSync(path.join(root,'live.html'),'utf8');
+ const js=fs.readFileSync(path.join(root,'live.js'),'utf8');
+ const css=fs.readFileSync(path.join(root,'live.css'),'utf8');
+ for(const name of ['qrImage','boardQRImage','boardLobby','boardJoinCode','boardJoinCount','playerArt','boardArt']){
+   assert.match(html,new RegExp('id="'+name+'"'));
+ }
+ assert.match(js,/function renderQr\(\)/);
+ assert.match(js,/quickchart\.io\/qr/);
+ assert.match(js,/function questionArt\(/);
+ assert.match(js,/function syncArt\(/);
+ assert.match(js,/querySelectorAll\('button'\)/);
+ assert.match(css,/\.board-lobby/);
+ assert.match(css,/\.question-art/);
+ assert.match(css,/\.leaderboard-row/);
+ assert.match(css,/\[hidden\]\s*\{\s*display:\s*none\s*!important/);
+});

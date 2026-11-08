@@ -57,44 +57,39 @@ Chọn **Commit changes → main**. Workflow Pages tự cập nhật phiên bả
 **KHÔNG đưa secret key, service_role key hoặc mật khẩu database vào GitHub/JS.**
 
 
-## 🔐 MC không được phép tự tạo phòng chỉ bằng link
+## 🔐 Đăng nhập MC bằng tài khoản riêng (không công khai mật khẩu)
 
-Tính từ bản cập nhật bảo mật: chỉ **email đã được xác minh và nằm trong danh sách MC** mới được quyền tạo phòng, chuyển câu, chấm điểm và kết thúc phòng. Không có MC nào được cấp quyền mặc định.
+Trên VNR202, mọi người có thể xem link website nhưng **chỉ MC đã được xác thực tại Supabase mới được tạo và điều khiển phòng**.
+Bản online hiện sử dụng **tên đăng nhập + mật khẩu do Supabase kiểm tra**, không đặt mật khẩu vào GitHub/JavaScript.
 
-### Cấp quyền MC (do chủ dự án thực hiện)
+### Thiết lập tài khoản MC lần đầu trong Supabase
 
-1. Vào **Supabase Dashboard → SQL Editor** trên project VNR202-TechFeud.
-2. Chọn email **của người thực sự làm MC**; không dùng email chung với các đội.
-3. Chạy câu SQL sau, thay `mc@example.com` bằng email cần cấp phép:
+1. Bật **Authentication → Providers → Anonymous Sign-Ins**. Trang MC và các đội đều cần xác thực ẩn danh Supabase để phân biệt từng thiết bị.
+2. Mở **Supabase Dashboard → SQL Editor** trên đúng dự án VNR202-TechFeud.
+3. Chạy câu lệnh dưới đây; thay YOUR_MC_USERNAME bằng tên đăng nhập MC và SET_A_UNIQUE_PASSWORD bằng mật khẩu **riêng, không dùng lại ở dịch vụ khác**:
 
-```sql
-insert into private.vnr_host_allowlist(email)
-values (lower('mc@example.com'))
-on conflict (email) do update set enabled = true;
-```
+~~~sql
+insert into private.vnr_mc_accounts (username,password_hash,enabled)
+values (
+  lower('YOUR_MC_USERNAME'),
+  extensions.crypt('SET_A_UNIQUE_PASSWORD', extensions.gen_salt('bf',12)),
+  true
+)
+on conflict (username) do update
+set password_hash=excluded.password_hash,
+    enabled=true,failed_attempts=0,locked_until=null;
+~~~
 
-Có thể cấp thêm email bằng cách chạy lại SQL với email khác. **Để thu hồi quyền MC**, chạy:
+4. Đăng nhập MC tại [màn hình MC](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host) bằng tên đăng nhập và mật khẩu đã đặt.
+5. Mỗi trình duyệt chỉ giữ quyền MC trong tối đa **2 giờ** mỗi lần đăng nhập. Nút Đăng xuất thu hồi quyền ngay lập tức.
 
-```sql
-update private.vnr_host_allowlist
-set enabled = false
-where email = lower('mc@example.com');
-```
+**Bảo mật:** Database chỉ lưu mật khẩu dưới dạng bcrypt hash; máy chủ khóa tài khoản tạm thời **15 phút sau 5 lần nhập sai**. Mật khẩu 6 chữ số chỉ phù hợp thử nhanh tại lớp, vẫn yếu nếu dùng lâu dài; khuyến nghị đặt mật khẩu riêng dài 12+ ký tự. Không đưa SQL có chứa mật khẩu thật lên GitHub hoặc chia sẻ truy cập SQL Editor cho người chơi.
 
-4. Đảm bảo **Authentication → Providers → Email** đang bật.
-5. Trong **Authentication → URL Configuration**, thêm URL sau vào danh sách Redirect URLs:
+> Nếu SQL Editor lưu lịch sử câu truy vấn chứa mật khẩu, hãy xóa truy vấn nháp sau khi chạy. **Mọi câu lệnh tạo tài khoản MC chỉ được chạy trong giao diện quản trị Supabase**, không được đưa vào client.
 
-```text
-https://khanhtm45.github.io/VNR202-TechFeud/live.html
-https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host
-```
+### Nguyên nhân thường gặp: Anonymous Sign-Ins đang tắt
 
-6. MC mở [màn hình MC](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host), nhập email và bấm **Gửi email đăng nhập**. Mở email và nhấp liên kết đăng nhập. Nếu mẫu email gửi mã 6 số (cấu hình `{{ .Token }}`), có thể nhập mã ngay trên trang.
-7. Sau xác thực, database kiểm tra email nằm trong allowlist. Chỉ lúc đó mới hiện bảng điều khiển.
-
-**Không đặt email hay mật khẩu MC trong JavaScript/HTML, không gửi mật khẩu hoặc mã OTP qua chat.** Các đội vẫn dùng đăng nhập ẩn danh và không cần email.
-
-Bộ kiểm soát quyền nằm trong PostgreSQL: `private.vnr_host_allowlist`, `vnr_is_authorized_host()`, `vnr_create_room()` và `vnr_control_room()`. Người biết URL hoặc tự sửa JavaScript vẫn không thể tạo hay điều khiển phòng nếu database từ chối.
+Nếu màn hình báo **“Anonymous sign-ins are disabled”** hoặc **HTTP 422**, bật Anonymous Sign-Ins trong Authentication → Providers. Supabase đã kết nối tới project nhưng chưa cấp phép tạo danh tính thiết bị; đây là lỗi cấu hình Auth, không phải lỗi khóa kết nối hay GitHub Pages.
 
 ## 5. Thử hệ thống
 

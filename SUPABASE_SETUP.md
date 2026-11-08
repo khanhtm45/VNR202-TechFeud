@@ -56,6 +56,46 @@ Chọn **Commit changes → main**. Workflow Pages tự cập nhật phiên bả
 **Publishable/anon key là khóa dành cho client, không phải bí mật.**
 **KHÔNG đưa secret key, service_role key hoặc mật khẩu database vào GitHub/JS.**
 
+
+## 🔐 MC không được phép tự tạo phòng chỉ bằng link
+
+Tính từ bản cập nhật bảo mật: chỉ **email đã được xác minh và nằm trong danh sách MC** mới được quyền tạo phòng, chuyển câu, chấm điểm và kết thúc phòng. Không có MC nào được cấp quyền mặc định.
+
+### Cấp quyền MC (do chủ dự án thực hiện)
+
+1. Vào **Supabase Dashboard → SQL Editor** trên project VNR202-TechFeud.
+2. Chọn email **của người thực sự làm MC**; không dùng email chung với các đội.
+3. Chạy câu SQL sau, thay `mc@example.com` bằng email cần cấp phép:
+
+```sql
+insert into private.vnr_host_allowlist(email)
+values (lower('mc@example.com'))
+on conflict (email) do update set enabled = true;
+```
+
+Có thể cấp thêm email bằng cách chạy lại SQL với email khác. **Để thu hồi quyền MC**, chạy:
+
+```sql
+update private.vnr_host_allowlist
+set enabled = false
+where email = lower('mc@example.com');
+```
+
+4. Đảm bảo **Authentication → Providers → Email** đang bật.
+5. Trong **Authentication → URL Configuration**, thêm URL sau vào danh sách Redirect URLs:
+
+```text
+https://khanhtm45.github.io/VNR202-TechFeud/live.html
+https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host
+```
+
+6. MC mở [màn hình MC](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host), nhập email và bấm **Gửi email đăng nhập**. Mở email và nhấp liên kết đăng nhập. Nếu mẫu email gửi mã 6 số (cấu hình `{{ .Token }}`), có thể nhập mã ngay trên trang.
+7. Sau xác thực, database kiểm tra email nằm trong allowlist. Chỉ lúc đó mới hiện bảng điều khiển.
+
+**Không đặt email hay mật khẩu MC trong JavaScript/HTML, không gửi mật khẩu hoặc mã OTP qua chat.** Các đội vẫn dùng đăng nhập ẩn danh và không cần email.
+
+Bộ kiểm soát quyền nằm trong PostgreSQL: `private.vnr_host_allowlist`, `vnr_is_authorized_host()`, `vnr_create_room()` và `vnr_control_room()`. Người biết URL hoặc tự sửa JavaScript vẫn không thể tạo hay điều khiển phòng nếu database từ chối.
+
 ## 5. Thử hệ thống
 
 1. Trên laptop, mở [Màn hình MC](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host).

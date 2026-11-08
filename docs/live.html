@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="vi"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#211127">
+<meta name="description" content="VNR202 Gameshow trực tuyến: MC tạo phòng, 8 đội tham gia bằng điện thoại và chấm điểm tự động.">
+<title>VNR202 · Gameshow trực tuyến 8 đội</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="stylesheet" href="./styles.css?v=2">
+<link rel="stylesheet" href="./live.css?v=1">
+<script type="module" src="./live.js?v=1"></script>
+</head>
+<body class="live-page">
+<div class="page live-shell">
+  <header class="live-header">
+    <div class="live-brand">
+      <p class="eyebrow">VNR202 • LỊCH SỬ ĐẢNG CỘNG SẢN VIỆT NAM</p>
+      <h1>HÀNH TRÌNH ĐỔI MỚI</h1>
+      <p>Phòng thi trực tuyến • 3 vòng • Tối đa 8 đội</p>
+    </div>
+    <div class="live-nav" aria-label="Chọn màn hình">
+      <button type="button" data-mode="host">🎛 MC</button>
+      <button type="button" data-mode="player">📱 Đội chơi</button>
+      <button type="button" data-mode="board">📺 Máy chiếu</button>
+      <a href="./index.html" class="live-back">↗ Bản chơi trên một máy</a>
+    </div>
+  </header>
+
+  <div id="connection" class="connection" role="status">Đang khởi tạo…</div>
+  <section id="setupBanner" class="live-alert" hidden>
+    <h2>Chưa kết nối Firebase</h2>
+    <p>Website đã có giao diện phòng chơi nhưng cần cấu hình Firebase của bạn để các điện thoại kết nối. Xem hướng dẫn trong <a href="https://github.com/khanhtm45/VNR202-TechFeud/blob/main/MULTIPLAYER_SETUP.md">MULTIPLAYER_SETUP.md</a>. Không nên sử dụng thử như một phòng chơi thật khi chưa cấu hình.</p>
+  </section>
+
+  <main>
+    <section id="hostScreen" class="live-screen" hidden>
+      <div class="live-heading"><span class="live-kicker">DÀNH CHO NGƯỜI ĐIỀU KHIỂN</span><h2>Điều khiển gameshow</h2><p>MC tạo phòng, chọn bộ câu hỏi riêng và điều phối các vòng thi.</p></div>
+      <div class="host-layout">
+        <aside class="live-panel host-setup">
+          <h3>01. Tạo phòng thi</h3>
+          <label class="field-label" for="questionUpload">Bộ câu hỏi có đáp án (tệp riêng tư JSON)</label>
+          <input id="questionUpload" type="file" accept=".json,application/json">
+          <p class="field-help">Không đăng tệp đáp án lên GitHub. Đáp án chỉ được gửi lên Firebase khi MC tạo phòng.</p>
+          <p id="fileSummary" class="live-muted">Chưa chọn bộ câu hỏi.</p>
+          <button id="createRoom" type="button" class="live-button primary" disabled>Tạo phòng & mã tham gia</button>
+          <div class="live-divider"></div>
+          <label class="field-label" for="hostCode">Mã phòng đã tạo (mở lại sau khi tải trang)</label>
+          <div class="form-row"><input id="hostCode" maxlength="6" inputmode="numeric" placeholder="6 chữ số"><button id="resumeHost" type="button" class="live-button">Mở</button></div>
+          <div id="hostRoomCard" class="host-room-card" hidden>
+            <p class="live-muted">MÃ PHÒNG CHO CÁC ĐỘI</p>
+            <div id="hostRoomCode" class="room-code">------</div>
+            <div class="qr-wrap"><img id="qrImage" alt="Mã QR để đội vào phòng" width="164" height="164"></div>
+            <p class="live-muted small">QR được tạo qua dịch vụ QR bên ngoài, chỉ chứa đường dẫn và mã phòng.</p>
+            <button id="copyJoinLink" type="button" class="live-button">Sao chép link tham gia</button>
+            <button id="openBoard" type="button" class="live-button">Mở màn hình máy chiếu</button>
+          </div>
+        </aside>
+        <div class="host-stage">
+          <div class="live-panel">
+            <div class="section-line"><h3>02. Danh sách đội</h3><span id="teamCount" class="count-pill">0/8 đội</span></div>
+            <div id="hostTeams" class="live-team-grid"></div>
+            <p class="field-help">Mỗi đội chỉ cần 1 điện thoại đại diện, tự nhập tên. Khi đủ đội, MC có thể bắt đầu.</p>
+          </div>
+          <div class="live-panel">
+            <div class="section-line"><h3>03. Điều khiển câu hỏi</h3><div id="hostStatus" class="status-pill">Chưa tạo phòng</div></div>
+            <div id="hostPrompt" class="prompt-box"><p>Đang chờ MC tạo phòng.</p></div>
+            <div id="hostTimer" class="countdown">00:00</div>
+            <div id="hostActions" class="live-actions">
+              <button id="nextQuestion" class="live-button primary" type="button" disabled>▶ Bắt đầu / Câu tiếp theo</button>
+              <button id="revealQuestion" class="live-button" type="button" disabled>✓ Công bố và tự chấm điểm</button>
+              <button id="finishGame" class="live-button danger" type="button" disabled>🏆 Kết thúc gameshow</button>
+            </div>
+            <p class="field-help">Hết giờ, bảng MC sẽ tự yêu cầu chấm điểm. Đáp án và điểm chỉ hiện sau khi kết thúc câu.</p>
+            <div id="hostReveal" class="answer-reveal" hidden></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="playerScreen" class="live-screen" hidden>
+      <div class="live-heading"><span class="live-kicker">DÀNH CHO ĐẠI DIỆN ĐỘI</span><h2>Tham gia bằng điện thoại</h2><p>Quét QR trên màn hình lớp, tự nhập tên đội và trả lời trên điện thoại của đội.</p></div>
+      <div class="player-layout">
+        <div class="live-panel player-form" id="joinFormPanel">
+          <h3>Tham gia phòng</h3>
+          <label class="field-label" for="joinCode">Mã phòng</label>
+          <input id="joinCode" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" placeholder="Ví dụ: 482916" autocomplete="one-time-code">
+          <label class="field-label" for="teamName">Tên đội của bạn</label>
+          <input id="teamName" maxlength="32" placeholder="Ví dụ: Đội Việt Nam Xanh" autocomplete="off">
+          <button id="joinRoom" class="live-button primary" type="button" disabled>Tham gia phòng thi</button>
+          <p class="field-help">Đội dùng chính điện thoại này để trả lời. Không cần tài khoản cá nhân.</p>
+        </div>
+        <div class="live-panel player-game" id="playerGame" hidden>
+          <div class="section-line"><h3 id="myTeamName">Đội chơi</h3><span id="myScore" class="count-pill">0 điểm</span></div>
+          <div id="playerStatus" class="live-muted">Đang chờ MC bắt đầu…</div>
+          <div class="live-question">
+            <div id="playerRound" class="live-kicker"></div>
+            <h3 id="playerPrompt">Hãy chuẩn bị!</h3>
+            <div id="playerTimer" class="countdown">00:00</div>
+            <div id="playerChoices" class="choices"></div>
+          </div>
+          <div id="playerFeedback" class="player-feedback" role="status"></div>
+          <div id="playerReveal" class="answer-reveal" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="boardScreen" class="live-screen" hidden>
+      <div class="section-line board-title-row"><div><p class="live-kicker">MÀN HÌNH MÁY CHIẾU</p><h2>Đấu trường VNR202</h2></div><div class="form-row"><input id="boardCode" inputmode="numeric" maxlength="6" placeholder="Mã phòng"><button id="watchBoard" class="live-button" type="button" disabled>Xem phòng</button><button id="boardFullscreen" class="live-button" type="button">Toàn màn hình</button></div></div>
+      <div class="board-meta"><div id="boardRoomCode" class="code-inline">PHÒNG ------</div><div id="boardStatus" class="status-pill">Đang chờ kết nối</div><div id="boardTimer" class="countdown">00:00</div></div>
+      <div id="boardTeams" class="live-team-grid"></div>
+      <div class="live-panel board-main-question"><p id="boardRound" class="live-kicker">HÀNH TRÌNH ĐỔI MỚI</p><h2 id="boardPrompt">Các đội hãy vào phòng bằng mã QR hoặc mã phòng.</h2><div id="boardChoices" class="choices board-choices"></div><div id="boardReveal" class="answer-reveal" hidden></div></div>
+      <div id="leaderboard" class="live-panel leaderboard" hidden></div>
+    </section>
+  </main>
+  <footer class="site-footer">VNR202 • GitHub Pages + Firebase • Kết nối nhiều thiết bị</footer>
+</div>
+<div id="liveToast" class="live-toast" role="status" aria-live="polite" hidden></div>
+</body></html>

@@ -64,3 +64,20 @@ test('Backend và frontend không có lỗi cú pháp JS',()=>{
    assert.equal(result.status,0,f+': '+result.stderr);
  }
 });
+
+
+test('Chỉ email MC được phép mới tạo hoặc điều khiển phòng',()=>{
+ const sql=fs.readFileSync(path.join(__dirname,'../supabase/migrations/202611090002_host_allowlist.sql'),'utf8');
+ const frontend=fs.readFileSync(path.join(__dirname,'../docs/live.js'),'utf8');
+ const page=fs.readFileSync(path.join(__dirname,'../docs/live.html'),'utf8');
+ assert.match(sql,/private\.vnr_host_allowlist/);
+ assert.match(sql,/u\.email_confirmed_at is not null/);
+ assert.match(sql,/u\.is_anonymous is false/);
+ assert.match(sql,/if not public\.vnr_is_authorized_host\(\)/);
+ assert.match(sql,/revoke all on schema private from public, anon, authenticated/);
+ assert.match(frontend,/app\.auth\.signInWithOtp/);
+ assert.match(frontend,/app\.auth\.verifyOtp/);
+ assert.match(frontend,/hostAuthorized/);
+ assert.match(page,/id="hostAuthPanel"/);
+ assert.match(page,/id="hostLayout" class="host-layout" hidden/);
+});

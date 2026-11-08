@@ -114,7 +114,7 @@ test('Tất cả 20 câu đều có SVG gốc, banner và QR ở cả MC/máy ch
  for(const name of ['qrImage','boardQRImage','boardLobby','boardJoinCode','boardJoinCount','playerArt','boardArt']){
    assert.match(html,new RegExp('id="'+name+'"'));
  }
- assert.match(js,/function renderQr\(\)/);
+ assert.match(js,/function renderQr\(which\)/);
  assert.match(js,/quickchart\.io\/qr/);
  assert.match(js,/function questionArt\(/);
  assert.match(js,/function syncArt\(/);

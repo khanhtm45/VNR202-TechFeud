@@ -1,8 +1,5 @@
-import {initializeApp} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInAnonymously} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-import {getFirestore,doc,collection,onSnapshot} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-functions.js";
-import {firebaseConfig,functionsRegion,isFirebaseConfigured} from "./firebase-config.js";
+import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js";
+import {supabaseConfig,isSupabaseConfigured} from "./supabase-config.js";
 
 const $=id=>document.getElementById(id);
 const MODES=['host','player','board'];
@@ -267,7 +264,12 @@ function wire(){
   $('questionUpload').addEventListener('change',e=>loadQuestions(e.target.files[0]));
   $('joinRoom').onclick=joinRoom;
   $('resumeHost').onclick=()=>watchRoom($('hostCode').value);
-  $('watchBoard').onclick=()=>watchRoom($('boardCode').value);
+  $('watchBoard').onclick=async()=>{
+    const newCode=sanitizedCode($('boardCode').value);
+    if(newCode.length!==6)return notify('Mã phòng phải có 6 số.',true);
+    try{await call('authorizeSpectator',{code:newCode});watchRoom(newCode);}
+    catch(err){notify(err.message||'Không thể xem phòng.',true);}
+  };
   $('nextQuestion').onclick=()=>control('NEXT');
   $('revealQuestion').onclick=()=>control('REVEAL');
   $('finishGame').onclick=()=>{if(confirm('Công bố bảng xếp hạng và kết thúc phòng?'))control('FINISH');};
@@ -287,25 +289,29 @@ async function init(){
   wire();
   displayMode(mode,false);
   setCode(code);
-  if(!isFirebaseConfigured){
+  if(!isSupabaseConfigured){
     $('setupBanner').hidden=false;
-    setConnection('Chưa cấu hình Firebase — mới là giao diện mẫu.');
+    setConnection('Chưa cấu hình Supabase — giao diện chưa kết nối cơ sở dữ liệu.');
     return;
   }
-  app=initializeApp(firebaseConfig);
-  auth=getAuth(app);db=getFirestore(app);functions=getFunctions(app,functionsRegion);
+  app=initializeApp(supabaseConfig);
+  auth=getAuth(app);db=getFirestore(app);functions=getFunctions(app);
   const existing=await new Promise(resolve=>{const unsubscribe=onAuthStateChanged(auth,u=>{unsubscribe();resolve(u);},()=>resolve(null));});
   user=existing||(await signInAnonymously(auth)).user;
-  setConnection('✓ Đã kết nối Firebase • '+MODE_LABELS[mode],true);
+  setConnection('✓ Đã kết nối Supabase • '+MODE_LABELS[mode],true);
   $('joinRoom').disabled=false;$('watchBoard').disabled=false;
   if(mode==='host'&&!code)code=readLocal('vnr202-host-code');
   if(mode==='player'&&!code)code=readLocal('vnr202-joined-code');
-  if(code)watchRoom(code);
-  else render();
+  if(code){
+    if(mode==='board'){
+      try{await call('authorizeSpectator',{code});watchRoom(code);}
+      catch(err){notify(err.message||'Không thể xem phòng.',true);render();}
+    }else watchRoom(code);
+  }else render();
 }
 init().catch(err=>{
   $('setupBanner').hidden=false;
-  setConnection('Không kết nối được Firebase.');
+  setConnection('Không kết nối được Supabase.');
   notify('Không thể khởi động: '+(err.message||err),true);
   console.error(err);
 });

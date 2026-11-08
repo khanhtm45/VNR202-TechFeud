@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VNR202 • Kiểm tra kết nối Supabase</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(125deg,#231329,#101c2d);color:#f5eee8;font:15px/1.5 system-ui,Arial,sans-serif;min-height:100vh}
+main{max-width:710px;margin:40px auto;padding:22px}
+h1{font:800 31px/1.25 Georgia,serif;color:#ffe2a9}
+p{color:#cfc5d6}.panel{background:#39263cdd;border:1px solid #a1829e;border-radius:18px;padding:22px}
+.line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #ffffff25;padding:15px 0;align-items:center;flex-wrap:wrap}
+.status{font-weight:800;color:#efd8a5}.good{color:#83e6b4}.bad{color:#ff9a9e}
+button,a.action{border:1px solid #d9ac79;background:#eacb93;color:#2d2033;font-weight:800;border-radius:11px;padding:12px 18px;cursor:pointer;display:inline-block;text-decoration:none;margin-top:15px;margin-right:7px}
+button.secondary,a.action.secondary{background:#49384f;color:#f8e8d4}
+button:disabled{opacity:.5;cursor:not-allowed}
+small{display:block;color:#cdbdca;margin-top:13px}
+#log{white-space:pre-wrap;word-break:break-word;color:#d8cadb;font-size:12px}
+</style>
+</head><body>
+<main><p style="color:#e5c48d;font-weight:900;letter-spacing:.15em">VNR202 • KIỂM TRA HỆ THỐNG</p>
+<h1>Kết nối Supabase</h1>
+<p>Trang này kiểm tra trực tiếp từ trình duyệt của bạn. Không yêu cầu đăng nhập MC, không cần mật khẩu database và không sử dụng thư viện từ CDN bên ngoài.</p>
+<div class="panel">
+  <div class="line"><strong>GitHub Pages</strong><span class="status good">Đã mở trang</span></div>
+  <div class="line"><strong>URL Supabase</strong><span id="urlStatus" class="status">Đang kiểm tra…</span></div>
+  <div class="line"><strong>Supabase Auth API</strong><span id="apiStatus" class="status">Đang kiểm tra…</span></div>
+  <div class="line"><strong>Anonymous Sign-Ins</strong><span id="anonStatus" class="status">Đang kiểm tra…</span></div>
+  <div class="line"><strong>Đăng nhập thử</strong><span id="loginStatus" class="status">Chưa kiểm tra</span></div>
+  <button id="recheck" type="button">Kiểm tra kết nối</button>
+  <button id="signIn" class="secondary" type="button">Thử đăng nhập ẩn danh</button>
+  <small>Nút “Thử đăng nhập” sẽ tạo một tài khoản ẩn danh kiểm tra trong Supabase. Không nhập bất kỳ mật khẩu nào tại trang này.</small>
+  <p id="advice" role="status"></p>
+  <details><summary>Chi tiết kỹ thuật</summary><pre id="log"></pre></details>
+</div>
+<a class="action secondary" href="./live.html?mode=host">Màn hình MC</a>
+<a class="action secondary" href="./live.html?mode=player">Màn hình đội chơi</a>
+</main>
+<script type="module">
+import {supabaseConfig,isSupabaseConfigured} from './supabase-config.js?v=20261109-status2';
+const $=id=>document.getElementById(id);
+const API=supabaseConfig.url;
+const KEY=supabaseConfig.anonKey;
+const reports=[];
+function line(id,msg,ok){const el=$(id);el.textContent=msg;el.className='status'+(ok===true?' good':ok===false?' bad':'');}
+function note(msg){$('advice').textContent=msg;}
+function technical(message){reports.push(message);$('log').textContent=reports.join('\n');}
+function adviceForError(error) {
+ const msg=String(error||'');
+ if(/anonymous.provider.disabled|anonymous sign.ins are disabled/i.test(msg))return 'Supabase đang từ chối đăng nhập ẩn danh. Vào Authentication → Providers → Anonymous Sign-Ins → Enabled → Save, sau đó kiểm tra lại.';
+ if(/failed to fetch|network|cors/i.test(msg))return 'Trình duyệt không truy cập được Supabase API. Kiểm tra mạng, DNS, VPN hoặc trình chặn nội dung.';
+ if(/Invalid API key|invalid.*apikey|API key not valid/i.test(msg))return 'Khóa publishable không được chấp nhận. Cần kiểm tra API Keys của dự án.';
+ return 'Có lỗi trong quá trình kiểm tra. Xem chi tiết kỹ thuật rồi gửi thông báo lỗi để mình xử lý.';
+}
+async function inspect(){
+ $('recheck').disabled=true;
+ reports.length=0;$('log').textContent='';
+ line('loginStatus','Chưa kiểm tra');
+ if(!isSupabaseConfigured){line('urlStatus','Thiếu cấu hình',false);line('apiStatus','Chưa kiểm tra',false);line('anonStatus','Chưa kiểm tra',false);note('Cần cập nhật supabase-config.js trên GitHub.');$('recheck').disabled=false;return;}
+ line('urlStatus','Đã cấu hình',true);
+ try{
+  const response=await fetch(API+'/auth/v1/settings',{headers:{apikey:KEY},cache:'no-store'});
+  const content=await response.text();
+  if(!response.ok)throw Error('HTTP '+response.status+' '+content.slice(0,180));
+  let settings={};try{settings=JSON.parse(content);}catch{}
+  line('apiStatus','Phản hồi HTTP '+response.status,true);
+  const enabled=settings?.external?.anonymous_users ?? settings?.external_anonymous_users_enabled;
+  if(enabled===true){line('anonStatus','Đã bật',true);note('Auth API phản hồi tốt. Có thể dùng nút thử đăng nhập để xác nhận toàn bộ luồng.');}
+  else if(enabled===false){line('anonStatus','Đang tắt',false);note('Anonymous Sign-Ins chưa bật trên Auth API, hoặc cài đặt chưa có hiệu lực.');}
+  else {line('anonStatus','Chưa xác định');note('Auth API hoạt động nhưng không trả về trạng thái đăng nhập ẩn danh. Dùng nút thử đăng nhập để kiểm tra.');}
+  technical('Auth settings: HTTP '+response.status+', anonymous='+String(enabled));
+ }catch(e){
+  line('apiStatus','Không thể truy cập',false);
+  line('anonStatus','Không xác định');
+  technical('Auth settings error: '+String(e));
+  note(adviceForError(e));
+ }finally{$('recheck').disabled=false;}
+}
+async function tryLogin(){
+ $('signIn').disabled=true;line('loginStatus','Đang gửi yêu cầu…');
+ try{
+  const response=await fetch(API+'/auth/v1/signup',{
+   method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:'{}',cache:'no-store'
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error('HTTP '+response.status+': '+(data.msg||data.message||data.error_description||data.error||JSON.stringify(data)).slice(0,200));
+  if(data?.access_token&&data?.user?.id){
+    line('loginStatus','Thành công • HTTP '+response.status,true);
+    note('Đăng nhập ẩn danh đã hoạt động. Bạn có thể mở lại trang MC/đội chơi.');
+    technical('Anonymous test: success (no credentials retained).');
+  }else{
+    line('loginStatus','Phản hồi chưa hợp lệ',false);
+    note('Supabase trả phản hồi nhưng thiếu session. Kiểm tra Auth configuration.');
+    technical('Anonymous test: HTTP '+response.status+', unexpected response.');
+  }
+ }catch(e){
+  line('loginStatus','Lỗi đăng nhập',false);
+  note(adviceForError(e));
+  technical('Anonymous login error: '+String(e));
+ }finally{$('signIn').disabled=false;}
+}
+$('recheck').onclick=inspect;
+$('signIn').onclick=tryLogin;
+inspect();
+</script>
+</body></html>

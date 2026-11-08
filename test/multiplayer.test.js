@@ -35,18 +35,28 @@ test('Bảo vệ tên đội và mã phòng',()=>{
  assert.equal(core.normalizeTeamName('  Đội Tri Thức  '),'Đội Tri Thức');
  assert.throws(()=>core.normalizeTeamName('   '));
 });
-test('Không đăng answer key vào frontend; Firestore từ chối ghi trực tiếp',()=>{
- const rules=fs.readFileSync(path.join(__dirname,'../firestore.rules'),'utf8');
- assert.match(rules,/roomSecrets/);
- assert.match(rules,/allow read, write: if false/);
+test('Supabase: khóa đáp án và điểm chỉ nằm ở private tables / RPC',()=>{
+ const sql=fs.readFileSync(path.join(__dirname,'../supabase/migrations/202611090001_vnr_multiplayer.sql'),'utf8');
  const js=fs.readFileSync(path.join(__dirname,'../docs/live.js'),'utf8');
- assert.match(js,/httpsCallable/);
- assert.match(js,/submitAnswer/);
- assert.match(js,/onSnapshot/);
+ const adapter=fs.readFileSync(path.join(__dirname,'../docs/supabase-adapter.js'),'utf8');
+ assert.match(sql,/alter table public\.vnr_room_questions enable row level security/i);
+ assert.match(sql,/alter table public\.vnr_room_submissions enable row level security/i);
+ assert.match(sql,/revoke all on table/i);
+ assert.match(sql,/security definer set search_path = ''/i);
+ assert.match(sql,/public\.vnr_submit_answer/);
+ assert.match(sql,/public\.vnr_control_room/);
+ assert.match(sql,/status='revealed'/);
+ assert.match(sql,/on conflict do nothing/);
+ assert.match(adapter,/https:\/\/esm\.sh\/@supabase/);
+ assert.match(adapter,/\.rpc\(rpc,args\)/);
+ assert.match(adapter,/postgres_changes/);
+ assert.match(js,/supabase-config\.js/);
+ assert.match(js,/authorizeSpectator/);
+ assert.ok(!js.includes('firebasejs')&&!js.includes('firebaseConfig'),'Client không dùng Firebase');
  assert.ok(!js.includes('correctIndex:0')&&!js.includes('correctIndex:1'),'Không chứa khóa đáp án cứng');
 });
 test('Backend và frontend không có lỗi cú pháp JS',()=>{
- for(const [f,esm] of [['functions/index.js',false],['functions/lib/quiz.js',false],['docs/live.js',true]]){
+ for(const [f,esm] of [['functions/index.js',false],['functions/lib/quiz.js',false],['docs/live.js',true],['docs/supabase-adapter.js',true],['docs/supabase-config.js',true]]){
    const input=fs.readFileSync(path.join(__dirname,'..',f),'utf8');
    const args=esm?['--input-type=module','--check']:['--check'];
    if(!esm)args.push(path.join(__dirname,'..',f));

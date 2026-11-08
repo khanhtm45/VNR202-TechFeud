@@ -2,7 +2,26 @@
 
 Gameshow tiếng Việt cho môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại hội XI (2011), Đại hội XII (2016), bảo vệ môi trường và thích ứng với biến đổi khí hậu.
 
-## 🌐 Giao diện mới trên GitHub Pages — hỗ trợ 8 đội
+## 🆕 Chế độ TRỰC TUYẾN: 8 đội, 8 điện thoại, chấm điểm tự động
+
+**Các màn hình mới:**
+
+- 🎛 [MC tạo phòng trực tuyến](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host)
+- 📱 [Đội chơi dùng điện thoại tham gia](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=player)
+- 📺 [Máy chiếu đồng bộ phòng trực tuyến](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=board)
+
+**Trạng thái:** Mã nguồn giao diện + Cloud Functions + Firestore Rules đã có trên GitHub. **Chưa thể tạo phòng thật cho đến khi chủ dự án kết nối Firebase và deploy backend.** Trang này chủ động thông báo thiếu cấu hình, không giả lập phòng chơi thật.
+
+**[HƯỚNG DẪN CÀI ĐẶT FIREBASE VÀ CHẠY 8 ĐIỆN THOẠI](./MULTIPLAYER_SETUP.md)**
+
+- MC tải tệp câu hỏi có đáp án **riêng tư** trên máy của mình và tạo phòng 6 chữ số; không đưa đáp án lên GitHub Pages.
+- Mỗi đội tự nhập tên trên điện thoại, giới hạn 8 đội, không có tên đội cố định.
+- Mỗi đội trả lời một lần/câu; Firebase Cloud Functions chấm điểm theo đáp án và thời gian trên server.
+- Hết giờ, nếu tab MC vẫn mở và kết nối, game tự yêu cầu chấm điểm và hiện bảng xếp hạng.
+- Vòng 2 của **bản online** dùng 4 lựa chọn để chấm tự động; không còn cơ chế đoán nhiều đáp án Family Feud.
+- **Cloud Functions yêu cầu Firebase Blaze (liên kết tài khoản thanh toán)**. Có hạn mức miễn phí nhưng không bảo đảm không phát sinh phí.
+
+## Bản CỤC BỘ trên GitHub Pages — 8 đội, cùng một trình duyệt
 
 **[Mở VNR202 Gameshow](https://khanhtm45.github.io/VNR202-TechFeud/)**
 

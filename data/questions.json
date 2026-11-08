@@ -1,0 +1,135 @@
+{
+  "gameTitle": "HÀNH TRÌNH ĐỔI MỚI",
+  "subtitle": "VNR202 · Đại hội XI – XII · Khát vọng Việt Nam xanh",
+  "rounds": {
+    "rapid": [
+      {
+        "id": "r1",
+        "question": "Đại hội đại biểu toàn quốc lần thứ XI diễn ra vào năm nào?",
+        "answer": "Năm 2011 (12–19/01/2011 tại Hà Nội).",
+        "points": 10,
+        "duration": 15
+      },
+      {
+        "id": "r2",
+        "question": "Cương lĩnh 2011 bổ sung, phát triển từ Cương lĩnh năm nào?",
+        "answer": "Năm 1991.",
+        "points": 10,
+        "duration": 15
+      },
+      {
+        "id": "r3",
+        "question": "Đại hội XI thông qua Chiến lược phát triển kinh tế – xã hội giai đoạn nào?",
+        "answer": "Giai đoạn 2011–2020.",
+        "points": 10,
+        "duration": 15
+      },
+      {
+        "id": "r4",
+        "question": "Đại hội đại biểu toàn quốc lần thứ XII diễn ra năm nào?",
+        "answer": "Năm 2016 (20–28/01/2016 tại Hà Nội).",
+        "points": 10,
+        "duration": 15
+      },
+      {
+        "id": "r5",
+        "question": "Đại hội XII xác định bao nhiêu nhiệm vụ trọng tâm?",
+        "answer": "6 nhiệm vụ trọng tâm.",
+        "points": 10,
+        "duration": 15
+      },
+      {
+        "id": "r6",
+        "question": "Nghị quyết 24-NQ/TW khóa XI tập trung vào ba vấn đề lớn nào?",
+        "answer": "Ứng phó biến đổi khí hậu, quản lý tài nguyên và bảo vệ môi trường.",
+        "points": 10,
+        "duration": 20
+      }
+    ],
+    "feud": [
+      {
+        "id": "f1",
+        "question": "Nêu 5 định hướng tiêu biểu của Cương lĩnh bổ sung, phát triển năm 2011.",
+        "duration": 65,
+        "answers": [
+          {
+            "text": "Công nghiệp hóa, hiện đại hóa",
+            "points": 30
+          },
+          {
+            "text": "Kinh tế thị trường định hướng XHCN",
+            "points": 25
+          },
+          {
+            "text": "Phát triển văn hóa, con người",
+            "points": 20
+          },
+          {
+            "text": "Bảo đảm quốc phòng, an ninh",
+            "points": 15
+          },
+          {
+            "text": "Đối ngoại, hội nhập quốc tế",
+            "points": 10
+          }
+        ]
+      },
+      {
+        "id": "f2",
+        "question": "Nêu 5 nội dung chủ yếu trong chủ đề Đại hội XII.",
+        "duration": 65,
+        "answers": [
+          {
+            "text": "Xây dựng Đảng trong sạch, vững mạnh",
+            "points": 30
+          },
+          {
+            "text": "Phát huy sức mạnh toàn dân tộc",
+            "points": 25
+          },
+          {
+            "text": "Đẩy mạnh toàn diện công cuộc đổi mới",
+            "points": 20
+          },
+          {
+            "text": "Bảo vệ Tổ quốc, giữ môi trường hòa bình",
+            "points": 15
+          },
+          {
+            "text": "Sớm trở thành nước công nghiệp hiện đại",
+            "points": 10
+          }
+        ]
+      }
+    ],
+    "green": [
+      {
+        "id": "g1",
+        "question": "Thành phố ngập sau mưa lớn. Hãy nêu 2 biện pháp thích ứng với biến đổi khí hậu.",
+        "hint": "Gợi ý: hệ thống thoát nước và cảnh báo sớm",
+        "image": "🌧️",
+        "answer": "Nâng cấp hệ thống thoát nước, tăng hồ điều hòa và không gian thấm nước; phát triển cảnh báo sớm.",
+        "points": 40,
+        "duration": 45
+      },
+      {
+        "id": "g2",
+        "question": "Khu dân cư có nhiều rác nhựa. Hãy nêu 2 giải pháp giảm ô nhiễm từ nguồn.",
+        "hint": "Gợi ý: thay đổi thói quen và quản lý rác",
+        "image": "♻️",
+        "answer": "Giảm nhựa dùng một lần, tăng tái sử dụng; phân loại tại nguồn và thu gom, tái chế đúng cách.",
+        "points": 40,
+        "duration": 45
+      },
+      {
+        "id": "g3",
+        "question": "Địa phương gặp hạn hán, xâm nhập mặn. Đề xuất 2 giải pháp thích ứng.",
+        "hint": "Gợi ý: nguồn nước và sản xuất nông nghiệp",
+        "image": "🌾",
+        "answer": "Trữ nước, tưới tiết kiệm; điều chỉnh mùa vụ, cây trồng và theo dõi cảnh báo độ mặn.",
+        "points": 40,
+        "duration": 50
+      }
+    ]
+  }
+}

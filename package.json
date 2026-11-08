@@ -1,0 +1,13 @@
+{
+  "name": "vnr202-techfeud",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gameshow VNR202 ba vòng — Đại hội XI, XII và Việt Nam xanh",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

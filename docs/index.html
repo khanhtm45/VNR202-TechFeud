@@ -68,10 +68,14 @@
         <div class="section-caption"><span class="caption-line"></span><span class="caption-label"><svg><use href="#i-users"/></svg> 8 ĐỘI THAM GIA</span><span class="caption-line"></span></div>
         <div id="homeTeamGrid" class="team-grid home-team-grid" aria-label="Tám đội tham gia"></div>
         <div class="hero-actions">
-          <a class="btn btn-gold" href="?view=board" target="_blank" rel="noopener"><svg><use href="#i-monitor"/></svg> Mở màn hình máy chiếu</a>
-          <button class="btn btn-outline-gold" data-view="host"><svg><use href="#i-sliders"/></svg> Mở bảng điều khiển MC</button>
+          <a class="btn btn-gold" href="./live.html?mode=host">🎛 Tạo phòng trực tuyến • 8 đội</a>
+          <a class="btn btn-outline-gold" href="./live.html?mode=player">📱 Đội chơi tham gia phòng</a>
         </div>
-        <p class="hero-note">Phiên bản GitHub Pages hoạt động trực tiếp trên trình duyệt • không cần Node.js</p>
+        <div class="hero-actions" style="margin-top:11px">
+          <a class="btn btn-outline-gold" href="?view=board" target="_blank" rel="noopener"><svg><use href="#i-monitor"/></svg> Chơi cục bộ: Máy chiếu</a>
+          <button class="btn btn-outline-gold" data-view="host"><svg><use href="#i-sliders"/></svg> Chơi cục bộ: MC</button>
+        </div>
+        <p class="hero-note">Chế độ trực tuyến cần Firebase. Chế độ cục bộ chạy trên cùng trình duyệt, không cần máy chủ.</p>
       </section>
 
       <section id="boardView" class="board-view" aria-label="Màn hình trình chiếu" hidden>

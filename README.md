@@ -1,56 +1,59 @@
 # VNR202 TechFeud — HÀNH TRÌNH ĐỔI MỚI
 
-Gameshow tiếng Việt phục vụ môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại hội XI (2011), Đại hội XII (2016), bảo vệ môi trường và ứng phó biến đổi khí hậu.
+Gameshow tiếng Việt cho môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại hội XI (2011), Đại hội XII (2016), bảo vệ môi trường và thích ứng với biến đổi khí hậu.
 
-## 🌐 Chơi trực tuyến trên GitHub Pages
+## 🌐 Giao diện mới trên GitHub Pages — hỗ trợ 8 đội
 
-**Trang game:** https://khanhtm45.github.io/VNR202-TechFeud/
+**[Mở VNR202 Gameshow](https://khanhtm45.github.io/VNR202-TechFeud/)**
 
-- **Màn hình trình chiếu:** https://khanhtm45.github.io/VNR202-TechFeud/?view=board
-- **Bảng điều khiển MC:** https://khanhtm45.github.io/VNR202-TechFeud/?view=host
+- [Trang chủ](https://khanhtm45.github.io/VNR202-TechFeud/?view=home)
+- [Màn hình trình chiếu](https://khanhtm45.github.io/VNR202-TechFeud/?view=board)
+- [Bảng điều khiển MC](https://khanhtm45.github.io/VNR202-TechFeud/?view=host)
 
-**Để bật Pages lần đầu:** vào **Settings → Pages → Build and deployment → Source → GitHub Actions**. Workflow `.github/workflows/pages.yml` sẽ tự đóng gói thư mục `docs/` và triển khai khi cập nhật nhánh `main`. Xem tab **Actions** để kiểm tra trạng thái phát hành.
+Bản thiết kế mới dùng phong cách **đỏ rượu vang / tím đậm / vàng đồng / xanh ngọc**, cùng giao diện thẻ đội và bảng điểm nhất quán. Có **8 đội** mặc định (Đội 1…Đội 8) được hiển thị ở trang chủ theo bố cục **4 cột × 2 hàng**, không còn giới hạn hai đội như trước.
 
-### Giới hạn của bản Pages (quan trọng)
+### Cách thuyết trình trên lớp
 
-GitHub Pages chỉ lưu trữ **file tĩnh**, không chạy Node.js. Vì vậy phiên bản `docs/index.html` sử dụng **localStorage + BroadcastChannel**, đồng bộ giữa các tab trong **cùng một trình duyệt / cùng hồ sơ trình duyệt trên một thiết bị**. Có thể kéo tab bảng chơi sang màn hình máy chiếu trong chế độ mở rộng (Extended display).
+1. Mở trang **Điều khiển MC** trên laptop, sửa tên 8 đội bằng nút **✎** nếu cần.
+2. Chọn **Mở tab máy chiếu** từ trang MC (hoặc mở link Máy chiếu).
+3. Kéo tab máy chiếu sang màn hình chiếu ở chế độ **Extend**, bấm **Toàn màn hình**.
+4. MC chọn vòng/câu hỏi, bật đồng hồ, công bố đáp án, chọn một trong **8 đội** để cộng điểm.
+5. Có thể điều chỉnh **+10/−10** điểm độc lập cho từng đội, dùng **Công bố kết quả** để xem bảng xếp hạng 8 đội.
 
-- Mở **MC** và **Máy chiếu** trong **hai tab cùng trình duyệt**.
-- Dữ liệu và bảng điểm của bản Pages được lưu **trên trình duyệt đang sử dụng**, không phải trên GitHub hay một server.
-- **Không hỗ trợ đồng bộ hai điện thoại/laptop khác nhau qua Internet**, không có PIN bảo vệ thực sự trên bản Pages.
-- Nếu cần đồng bộ nhiều thiết bị, dùng **bản Node.js** bên dưới hoặc dịch vụ backend chuyên dụng.
+**Lưu ý kỹ thuật:** GitHub Pages là hosting tĩnh. Đồng bộ bảng MC ↔ máy chiếu sử dụng `localStorage` và `BroadcastChannel`, chỉ đảm bảo giữa **các tab trên cùng trình duyệt / cùng profile và cùng thiết bị**. Không đồng bộ giữa 8 điện thoại hay hai laptop độc lập. Không có PIN MC trên bản Pages; chỉ mở bảng điều khiển trong máy của người quản trò.
 
-## 🖥️ Bản Node.js chạy trên laptop
+### Luật ba vòng
 
-Cần Node.js >= 18. Trong thư mục dự án chạy:
+| Vòng | Chủ đề | Số câu | Tính điểm |
+|---|---|---:|---|
+| 01 · Dấu mốc lịch sử | Đại hội XI, XII | 6 | 10 điểm/câu |
+| 02 · Giải mã Đại hội | Năm đáp án ẩn trên mỗi bảng | 2 | Tổng tối đa 100 điểm/bảng |
+| 03 · Việt Nam xanh | Tình huống môi trường, biến đổi khí hậu | 3 | 40 điểm/câu |
 
-```bash
-npm start
-```
+Cả 8 đội có thể thi trả lời những câu hỏi trên, MC chọn đội được quyền trả lời và trao điểm. Game chưa tích hợp chuông bấm trực tuyến, hệ thống trả lời bằng điện thoại hoặc chấm đáp án tự động.
 
-Địa chỉ: `http://localhost:3000/` (trang chủ / giao diện game), `/api/state` (trạng thái), `/api/host-state` (quản lý bằng PIN). Bản server dùng Server-Sent Events (SSE), lưu trạng thái ở `data/state.json` và PIN MC từ biến môi trường `HOST_PIN`. PIN mặc định cho máy cá nhân là `2026`; phải thay PIN trước khi mở truy cập mạng.
+**Chấm điểm:** MC mở đáp án rồi trao điểm cho đội đã chọn; mỗi câu hỏi chỉ được trao tự động một lần, tránh cộng lặp. Điểm ở vòng 2 là trọng số trò chơi **30–25–20–15–10**, không phải kết quả khảo sát người chơi.
 
-**Lưu ý:** Giao diện MC/máy chiếu tĩnh tại `docs/` hoạt động độc lập với backend Node.js; các phiên chơi không được chia sẻ giữa hai phiên bản này.
+### Các tệp của bản GitHub Pages
 
-## 🎮 Ba vòng
+| Tệp | Vai trò |
+|---|---|
+| `docs/index.html` | Trang chủ, bảng máy chiếu và bảng điều khiển MC |
+| `docs/styles.css` | Giao diện desktop/mobile, theme dark plum/gold/teal |
+| `docs/app.js` | Hiển thị 8 đội, điều khiển MC và đồng bộ các tab |
+| `docs/engine.js` | Luật ba vòng, điểm của 8 đội, đồng hồ, chặn cộng trùng |
+| `docs/questions.json` | Ngân hàng câu hỏi |
+| `docs/favicon.svg` | Logo tab trình duyệt |
+| `test/pages-engine.test.js` | Kiểm thử game tám đội và cú pháp JavaScript |
 
-| Vòng | Nội dung | Câu | Điểm |
-| --- | --- | ---: | --- |
-| 1 · Dấu mốc lịch sử | Trả lời nhanh Đại hội XI, XII | 6 | 10 điểm/câu |
-| 2 · Giải mã Đại hội | Mở bảng 5 đáp án | 2 | Tối đa 100 điểm/bảng |
-| 3 · Việt Nam xanh | Ứng phó các tình huống môi trường | 3 | 40 điểm/câu |
+**Tự động triển khai:** commit lên nhánh `main` có thay đổi trong thư mục `docs/` sẽ chạy workflow `.github/workflows/pages.yml`. Xem [Actions](https://github.com/khanhtm45/VNR202-TechFeud/actions) để xác nhận trạng thái `Deploy VNR202 to GitHub Pages` là **Success**.
 
-Điểm tại vòng 2 là trọng số do nhóm quy ước, **không phải khảo sát mức độ phổ biến**. Câu hỏi được biên soạn dựa trên Session 26 (Đại hội XI), Session 27 (Đại hội XII) và các tình huống vận dụng.
+### Lưu ý về phiên bản Node.js
 
-## Cấu trúc repo
+Ngoài bản Pages ở `docs/`, repo vẫn có **phiên bản server Node.js cũ** trong `server.js`/`public/` dùng Node 18+, SSE và PIN MC. **Phiên bản Node.js này chưa được nâng lên giao diện và cơ chế 8 đội mới**. Với yêu cầu 8 đội và trình chiếu trên lớp, hãy dùng bản **GitHub Pages** nêu trên.
 
-- `docs/index.html` — web game tĩnh, dùng cho GitHub Pages (ba chế độ Home / Board / Host)
-- `docs/questions.json` — ngân hàng câu hỏi của phiên bản Pages
-- `.github/workflows/pages.yml` — triển khai Pages tự động
-- `server.js`, `public/index.html`, `data/questions.json` — phiên bản Node.js riêng
-- `test/smoke.test.js` — kiểm tra HTTP/API bản Node.js
-- `.github/workflows/ci.yml` — workflow kiểm thử khi push
+## Cơ sở nội dung và nguồn cảm hứng
 
-## Giấy phép
+Câu hỏi được xây dựng từ tài liệu Session 26 (Đại hội XI) và Session 27 (Đại hội XII) do người dùng cung cấp. Phần tình huống môi trường là câu hỏi vận dụng do nhóm thiết kế, cần được giảng viên rà soát trước khi chấm chính thức.
 
-MIT. Dự án lấy cảm hứng từ [TechFeud Classroom Edition](https://github.com/ImMaddd/TechFeud); đây là phiên bản triển khai riêng cho môn VNR202.
+Dự án lấy cảm hứng từ [TechFeud Classroom Edition](https://github.com/ImMaddd/TechFeud), nhưng là bản code riêng theo giấy phép MIT; không sao chép nguyên trạng source gốc.

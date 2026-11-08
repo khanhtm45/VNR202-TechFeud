@@ -6,8 +6,8 @@
 <title>VNR202 · Gameshow trực tuyến 8 đội</title>
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="stylesheet" href="./styles.css?v=2">
-<link rel="stylesheet" href="./live.css?v=3">
-<script type="module" src="./live.js?v=3"></script>
+<link rel="stylesheet" href="./live.css?v=4">
+<script type="module" src="./live.js?v=4"></script>
 </head>
 <body class="live-page">
 <div class="page live-shell">
@@ -35,18 +35,14 @@
     <section id="hostScreen" class="live-screen" hidden>
       <div class="live-heading"><span class="live-kicker">DÀNH CHO NGƯỜI ĐIỀU KHIỂN</span><h2>Điều khiển gameshow</h2><p>MC tạo phòng, chọn bộ câu hỏi riêng và điều phối các vòng thi.</p></div>
       <div id="hostAuthPanel" class="live-panel host-auth-panel">
-        <h3>🔐 Đăng nhập tài khoản MC</h3>
-        <p>Chỉ email MC đã được cấp quyền mới có thể tạo hoặc điều khiển phòng. Link website không cấp quyền điều khiển.</p>
-        <label class="field-label" for="hostEmail">Email MC được cho phép</label>
-        <input id="hostEmail" type="email" placeholder="mc@example.com" autocomplete="email" inputmode="email">
-        <div class="live-actions host-auth-actions">
-          <button id="hostSendOtp" class="live-button primary" type="button">Gửi email đăng nhập</button>
-        </div>
-        <label class="field-label" for="hostOtp">Mã xác minh 6 số (nếu email có mã)</label>
-        <input id="hostOtp" type="text" inputmode="numeric" maxlength="8" autocomplete="one-time-code" placeholder="Nhập mã từ email">
-        <button id="hostVerifyOtp" type="button" class="live-button">Xác nhận mã MC</button>
-        <p id="hostAuthMessage" class="field-help" role="status">Bạn sẽ nhận email chứa liên kết hoặc mã xác minh. Không chia sẻ email/mã cho các đội.</p>
-        <p class="field-help">Nếu email chứa liên kết đăng nhập, hãy mở liên kết trên cùng trình duyệt. Địa chỉ trang MC phải được thêm vào Supabase Auth URL Configuration.</p>
+        <h3>🔐 Đăng nhập MC</h3>
+        <p>Chỉ MC có tài khoản được kích hoạt trong Supabase mới có thể tạo và điều khiển phòng thi. Đội chơi không cần đăng nhập MC.</p>
+        <label class="field-label" for="hostUsername">Tên đăng nhập MC</label>
+        <input id="hostUsername" type="text" maxlength="32" autocomplete="username" placeholder="Tên đăng nhập MC">
+        <label class="field-label" for="hostPassword">Mật khẩu MC</label>
+        <input id="hostPassword" type="password" maxlength="128" autocomplete="current-password" placeholder="Nhập mật khẩu">
+        <button id="hostLogin" class="live-button primary" type="button" disabled>Đăng nhập MC</button>
+        <p id="hostAuthMessage" class="field-help" role="status">Tài khoản phải được kích hoạt trong Supabase. Mật khẩu không được lưu trong website công khai.</p>
       </div>
       <div id="hostAuthStatus" class="host-auth-status" hidden>
         <span id="hostAuthIdentity">Đã đăng nhập MC</span>

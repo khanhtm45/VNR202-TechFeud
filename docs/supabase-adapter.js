@@ -7,7 +7,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 export function initializeApp(config) {
   return createClient(config.url, config.anonKey, {
-    auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:false },
+    auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true },
     realtime: { params: { eventsPerSecond:10 } }
   });
 }

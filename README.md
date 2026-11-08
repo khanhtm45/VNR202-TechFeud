@@ -1,78 +1,71 @@
-# VNR202 TechFeud — HÀNH TRÌNH ĐỔI MỚI
+# VNR202 — HÀNH TRÌNH ĐỔI MỚI
 
-Gameshow tiếng Việt cho môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại hội XI (2011), Đại hội XII (2016), bảo vệ môi trường và thích ứng với biến đổi khí hậu.
+Gameshow môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại hội XI (2011), Đại hội XII (2016), bảo vệ môi trường và ứng phó biến đổi khí hậu.
 
-## 🆕 Chế độ TRỰC TUYẾN: 8 đội, 8 điện thoại, chấm điểm tự động
+## 🎮 Chế độ ONLINE — GitHub Pages + Supabase Free
 
-**Các màn hình mới:**
+**8 đội tự đăng ký bằng điện thoại.** MC không phải tạo sẵn tên đội và không phải cộng điểm thủ công.
 
-- 🎛 [MC tạo phòng trực tuyến](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host)
-- 📱 [Đội chơi dùng điện thoại tham gia](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=player)
-- 📺 [Máy chiếu đồng bộ phòng trực tuyến](https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=board)
+| Màn hình | Đường dẫn |
+|---|---|
+| 🎛 MC tạo phòng / chấm điểm | https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=host |
+| 📱 Người đại diện đội | https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=player |
+| 📺 Máy chiếu trực tiếp | https://khanhtm45.github.io/VNR202-TechFeud/live.html?mode=board |
 
-**Trạng thái:** Mã nguồn giao diện + Cloud Functions + Firestore Rules đã có trên GitHub. **Chưa thể tạo phòng thật cho đến khi chủ dự án kết nối Firebase và deploy backend.** Trang này chủ động thông báo thiếu cấu hình, không giả lập phòng chơi thật.
+### Trạng thái triển khai
+- **Đã code + push GitHub:** Giao diện ba loại thiết bị, tạo phòng 6 số/QR, đội tự nhập tên, giới hạn 8 đội, bảng xếp hạng, đồng bộ qua Supabase Realtime.
+- **Đã code:** PostgreSQL RPC \`SECURITY DEFINER\` kiểm tra MC, phòng, đáp án, thời gian, chống gửi trùng, tự chấm điểm và không tiết lộ đáp án đúng trước khi công bố.
+- **Đã code:** RLS chỉ cho người tham gia hoặc được cấp quyền xem bảng chiếu đọc bảng điểm; không cho browser cập nhật điểm hay đọc bảng đáp án.
+- **Chưa hoàn thành:** Tạo/triển khai database trên dự án Supabase của chủ repository và nhập URL + publishable key vào \`docs/supabase-config.js\`. **Chưa thể tạo phòng thật trước bước này.**
 
-**[HƯỚNG DẪN CÀI ĐẶT FIREBASE VÀ CHẠY 8 ĐIỆN THOẠI](./MULTIPLAYER_SETUP.md)**
+➡️ **[HƯỚNG DẪN KÍCH HOẠT SUPABASE FREE (không cần Google Cloud Billing)](./SUPABASE_SETUP.md)**
 
-- MC tải tệp câu hỏi có đáp án **riêng tư** trên máy của mình và tạo phòng 6 chữ số; không đưa đáp án lên GitHub Pages.
-- Mỗi đội tự nhập tên trên điện thoại, giới hạn 8 đội, không có tên đội cố định.
-- Mỗi đội trả lời một lần/câu; Firebase Cloud Functions chấm điểm theo đáp án và thời gian trên server.
-- Hết giờ, nếu tab MC vẫn mở và kết nối, game tự yêu cầu chấm điểm và hiện bảng xếp hạng.
-- Vòng 2 của **bản online** dùng 4 lựa chọn để chấm tự động; không còn cơ chế đoán nhiều đáp án Family Feud.
-- **Cloud Functions yêu cầu Firebase Blaze (liên kết tài khoản thanh toán)**. Có hạn mức miễn phí nhưng không bảo đảm không phát sinh phí.
+### Cách chơi (sau khi cấu hình Supabase)
+1. MC tải riêng file JSON **20 câu có đáp án** từ thiết bị cá nhân, nhấn **Tạo phòng**.
+2. Màn hình MC hiện **mã 6 số và QR**.
+3. 8 đội dùng **8 điện thoại đại diện**, mỗi đội tự điền tên khi vào phòng.
+4. MC bắt đầu câu hỏi; các đội gửi lựa chọn A/B/C/D một lần/câu.
+5. Phần SQL trong Supabase nhận đáp án, tính điểm phía database; lúc công bố mới cập nhật điểm và hiển thị đáp án.
+6. Bảng máy chiếu cập nhật theo thời gian thực, cuối game hiện xếp hạng tám đội.
 
-## Bản CỤC BỘ trên GitHub Pages — 8 đội, cùng một trình duyệt
+**Điểm:** Vòng 1 đúng 100–150; vòng 2 đúng 150–200; vòng 3 đúng 200. Trả lời sai: 0. Hai vòng đầu có thưởng tốc độ tối đa +50. Đây là **phiên bản trắc nghiệm 4 đáp án** của ba vòng để tự chấm, khác với game Family Feud mở 5 đáp án ở bản một thiết bị.
 
-**[Mở VNR202 Gameshow](https://khanhtm45.github.io/VNR202-TechFeud/)**
+**Bảo mật:** Không đưa tệp 20 câu chứa \`correctIndex\` lên GitHub công khai. MC chọn tệp trực tiếp trong giao diện. Không bao giờ cho \`service_role\`/secret key lên frontend.
+
+**Tài nguyên miễn phí:** Supabase có gói Free với hạn mức, có thể tự tạm dừng database sau thời gian không hoạt động. Nên mở trang và chạy thử trước buổi học.
+
+## 🖥 Chế độ một máy — dự phòng khi không có backend
+
+**[Mở giao diện gốc](https://khanhtm45.github.io/VNR202-TechFeud/)**
 
 - [Trang chủ](https://khanhtm45.github.io/VNR202-TechFeud/?view=home)
-- [Màn hình trình chiếu](https://khanhtm45.github.io/VNR202-TechFeud/?view=board)
+- [Màn hình máy chiếu](https://khanhtm45.github.io/VNR202-TechFeud/?view=board)
 - [Bảng điều khiển MC](https://khanhtm45.github.io/VNR202-TechFeud/?view=host)
 
-Bản thiết kế mới dùng phong cách **đỏ rượu vang / tím đậm / vàng đồng / xanh ngọc**, cùng giao diện thẻ đội và bảng điểm nhất quán. Có **8 đội** mặc định (Đội 1…Đội 8) được hiển thị ở trang chủ theo bố cục **4 cột × 2 hàng**, không còn giới hạn hai đội như trước.
+Chế độ này đã chạy độc lập trên GitHub Pages, có đủ 8 đội theo dạng thẻ (4×2), ba vòng, chấm điểm bởi MC, đồng bộ giữa các tab cùng một trình duyệt qua \`localStorage\` và \`BroadcastChannel\`. **Không phải chế độ 8 điện thoại kết nối từ xa**.
 
-### Cách thuyết trình trên lớp
+## 🧱 Cấu trúc dự án
 
-1. Mở trang **Điều khiển MC** trên laptop, sửa tên 8 đội bằng nút **✎** nếu cần.
-2. Chọn **Mở tab máy chiếu** từ trang MC (hoặc mở link Máy chiếu).
-3. Kéo tab máy chiếu sang màn hình chiếu ở chế độ **Extend**, bấm **Toàn màn hình**.
-4. MC chọn vòng/câu hỏi, bật đồng hồ, công bố đáp án, chọn một trong **8 đội** để cộng điểm.
-5. Có thể điều chỉnh **+10/−10** điểm độc lập cho từng đội, dùng **Công bố kết quả** để xem bảng xếp hạng 8 đội.
-
-**Lưu ý kỹ thuật:** GitHub Pages là hosting tĩnh. Đồng bộ bảng MC ↔ máy chiếu sử dụng `localStorage` và `BroadcastChannel`, chỉ đảm bảo giữa **các tab trên cùng trình duyệt / cùng profile và cùng thiết bị**. Không đồng bộ giữa 8 điện thoại hay hai laptop độc lập. Không có PIN MC trên bản Pages; chỉ mở bảng điều khiển trong máy của người quản trò.
-
-### Luật ba vòng
-
-| Vòng | Chủ đề | Số câu | Tính điểm |
-|---|---|---:|---|
-| 01 · Dấu mốc lịch sử | Đại hội XI, XII | 6 | 10 điểm/câu |
-| 02 · Giải mã Đại hội | Năm đáp án ẩn trên mỗi bảng | 2 | Tổng tối đa 100 điểm/bảng |
-| 03 · Việt Nam xanh | Tình huống môi trường, biến đổi khí hậu | 3 | 40 điểm/câu |
-
-Cả 8 đội có thể thi trả lời những câu hỏi trên, MC chọn đội được quyền trả lời và trao điểm. Game chưa tích hợp chuông bấm trực tuyến, hệ thống trả lời bằng điện thoại hoặc chấm đáp án tự động.
-
-**Chấm điểm:** MC mở đáp án rồi trao điểm cho đội đã chọn; mỗi câu hỏi chỉ được trao tự động một lần, tránh cộng lặp. Điểm ở vòng 2 là trọng số trò chơi **30–25–20–15–10**, không phải kết quả khảo sát người chơi.
-
-### Các tệp của bản GitHub Pages
-
-| Tệp | Vai trò |
+| Thư mục / file | Vai trò |
 |---|---|
-| `docs/index.html` | Trang chủ, bảng máy chiếu và bảng điều khiển MC |
-| `docs/styles.css` | Giao diện desktop/mobile, theme dark plum/gold/teal |
-| `docs/app.js` | Hiển thị 8 đội, điều khiển MC và đồng bộ các tab |
-| `docs/engine.js` | Luật ba vòng, điểm của 8 đội, đồng hồ, chặn cộng trùng |
-| `docs/questions.json` | Ngân hàng câu hỏi |
-| `docs/favicon.svg` | Logo tab trình duyệt |
-| `test/pages-engine.test.js` | Kiểm thử game tám đội và cú pháp JavaScript |
+| \`docs/live.html\` | MC / Đội chơi / Máy chiếu online |
+| \`docs/live.js\` | Giao diện và sự kiện ba màn hình |
+| \`docs/live.css\` | Thiết kế responsive online |
+| \`docs/supabase-adapter.js\` | RPC + Realtime + xác thực ẩn danh Supabase |
+| \`docs/supabase-config.js\` | **Chỉ** chứa URL + publishable key |
+| \`supabase/migrations/202611090001_vnr_multiplayer.sql\` | Database, RLS, RPC chấm điểm |
+| \`SUPABASE_SETUP.md\` | Các bước tạo dự án, chạy SQL và thử với điện thoại |
+| \`docs/index.html\`, \`docs/app.js\`, \`docs/engine.js\` | Bản chơi một máy |
+| \`test/*.test.js\` | Kiểm thử code Node + multiplayer |
 
-**Tự động triển khai:** commit lên nhánh `main` có thay đổi trong thư mục `docs/` sẽ chạy workflow `.github/workflows/pages.yml`. Xem [Actions](https://github.com/khanhtm45/VNR202-TechFeud/actions) để xác nhận trạng thái `Deploy VNR202 to GitHub Pages` là **Success**.
+Các file \`firebase.json\`, \`functions/\`, \`firestore.rules\` là **mã thử nghiệm Firebase cũ**, không còn được dùng trong bản online Supabase. Chúng được giữ lại để tham khảo lịch sử dự án; không cần triển khai và không cần nâng cấp Firebase Blaze.
 
-### Lưu ý về phiên bản Node.js
+### Test
+\`\`\`sh
+npm test
+\`\`\`
 
-Ngoài bản Pages ở `docs/`, repo vẫn có **phiên bản server Node.js cũ** trong `server.js`/`public/` dùng Node 18+, SSE và PIN MC. **Phiên bản Node.js này chưa được nâng lên giao diện và cơ chế 8 đội mới**. Với yêu cầu 8 đội và trình chiếu trên lớp, hãy dùng bản **GitHub Pages** nêu trên.
+### Nguồn học liệu
+Session 26 (Đại hội XI), Session 27 (Đại hội XII), cùng các tình huống về môi trường do nhóm biên soạn. Nội dung câu hỏi cần được giảng viên rà soát trước khi dùng chấm chính thức.
 
-## Cơ sở nội dung và nguồn cảm hứng
-
-Câu hỏi được xây dựng từ tài liệu Session 26 (Đại hội XI) và Session 27 (Đại hội XII) do người dùng cung cấp. Phần tình huống môi trường là câu hỏi vận dụng do nhóm thiết kế, cần được giảng viên rà soát trước khi chấm chính thức.
-
-Dự án lấy cảm hứng từ [TechFeud Classroom Edition](https://github.com/ImMaddd/TechFeud), nhưng là bản code riêng theo giấy phép MIT; không sao chép nguyên trạng source gốc.
+Dự án được xây dựng riêng, có tham khảo ý tưởng tổ chức gameshow từ [TechFeud Classroom Edition](https://github.com/ImMaddd/TechFeud). MIT license.

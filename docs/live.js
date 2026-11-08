@@ -48,11 +48,12 @@ function renderHostAccess(){
   $('hostAuthPanel').hidden=hostAuthorized;
   $('hostLayout').hidden=!hostAuthorized;
   $('hostAuthStatus').hidden=!hostAuthorized;
-  if(hostAuthorized)showText('hostAuthIdentity','🔐 MC: '+(user?.email||'Tài khoản đã xác thực'));
+  $('hostLogin').disabled=!user||!app||hostAuthorized;
+  if(hostAuthorized)showText('hostAuthIdentity','🔐 MC đã đăng nhập');
 }
 async function checkHostAccess(){
   hostAuthorized=false;
-  if(user&&!user.is_anonymous&&app){
+  if(user&&app){
     try{
       const {data,error}=await app.rpc('vnr_is_authorized_host');
       if(error)throw error;
@@ -63,48 +64,42 @@ async function checkHostAccess(){
   render();
   return hostAuthorized;
 }
-async function hostSendOtp(){
-  const email=$('hostEmail').value.trim().toLowerCase();
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return notify('Nhập email MC hợp lệ.',true);
-  $('hostSendOtp').disabled=true;
+async function hostLogin(){
+  if(!user||!app)return notify('Chưa có kết nối đăng nhập Supabase. Hãy bật Anonymous Sign-Ins.',true);
+  const username=$('hostUsername').value.trim().toLowerCase();
+  const password=$('hostPassword').value;
+  if(!/^[a-z0-9_]{4,32}$/.test(username)||!password)return notify('Nhập tên đăng nhập và mật khẩu MC.',true);
+  $('hostLogin').disabled=true;
   try{
-    const redirect=new URL('./live.html?mode=host',location.href).toString();
-    const {error}=await app.auth.signInWithOtp({
-      email,options:{emailRedirectTo:redirect,shouldCreateUser:true}
-    });
+    const {data,error}=await app.rpc('vnr_mc_login',{p_username:username,p_password:password});
     if(error)throw error;
-    showText('hostAuthMessage','Đã gửi email đăng nhập. Hãy mở liên kết trong thư hoặc nhập mã OTP nếu thư có mã 6 chữ số.');
-    notify('Đã gửi email đăng nhập MC.');
-  }catch(err){notify('Lỗi gửi email: '+err.message,true);}
-  finally{$('hostSendOtp').disabled=false;}
-}
-async function hostVerifyOtp(){
-  const email=$('hostEmail').value.trim().toLowerCase();
-  const token=$('hostOtp').value.trim().replace(/\s/g,'');
-  if(!email||!/^\d{6,8}$/.test(token))return notify('Nhập email và mã OTP hợp lệ.',true);
-  $('hostVerifyOtp').disabled=true;
-  try{
-    const {data,error}=await app.auth.verifyOtp({email,token,type:'email'});
-    if(error)throw error;
-    user=data.user;
-    if(await checkHostAccess()){
+    $('hostPassword').value='';
+    if(data?.ok===true && await checkHostAccess()){
       notify('✓ Đăng nhập MC thành công.');
       if(code)watchRoom(code);
     }else{
-      showText('hostAuthMessage','Email đã xác thực nhưng chưa được người quản lý cho phép làm MC.');
-      notify('Email này chưa có quyền MC.',true);
+      const reason=data?.error==='locked'
+        ?'Tạm khóa 15 phút do nhập sai nhiều lần. Hãy thử lại sau.'
+        : 'Tên đăng nhập hoặc mật khẩu không đúng, hoặc tài khoản chưa kích hoạt.';
+      showText('hostAuthMessage',reason);
+      notify(reason,true);
     }
-  }catch(err){notify('Không xác minh được mã: '+err.message,true);}
-  finally{$('hostVerifyOtp').disabled=false;}
+  }catch(err){
+    $('hostPassword').value='';
+    notify('Lỗi xác thực MC: '+err.message,true);
+  }finally{$('hostLogin').disabled=!user||hostAuthorized;}
 }
 async function hostSignOut(){
   try{
-    await app.auth.signOut();
-    user=null;hostAuthorized=false;
+    if(app&&user){
+      const {error}=await app.rpc('vnr_mc_logout');
+      if(error)throw error;
+    }
+    hostAuthorized=false;
     stopListening();room=null;teams=[];
     renderHostAccess();render();
-    notify('Đã đăng xuất MC.');
-  }catch(err){notify('Lỗi đăng xuất: '+err.message,true);}
+    notify('Đã đăng xuất quyền MC.');
+  }catch(err){notify('Không thể đăng xuất MC: '+err.message,true);}
 }
 
 function sanitizedCode(value){return String(value||'').replace(/\D/g,'').slice(0,6);}
@@ -332,15 +327,15 @@ async function loadQuestions(file){
 function wire(){
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',async()=>{
     displayMode(b.dataset.mode);
-    if(b.dataset.mode==='host'&&user&&!user.is_anonymous&&!hostAuthorized)await checkHostAccess();
+    if(b.dataset.mode==='host'&&user&&!hostAuthorized)await checkHostAccess();
     if(b.dataset.mode!=='host'&&!user&&auth){
       try{user=(await signInAnonymously(auth)).user;render();}
       catch(err){notify('Không đăng nhập được người chơi: '+err.message,true);}
     }
   }));
   $('createRoom').onclick=createRoom;
-  $('hostSendOtp').onclick=hostSendOtp;
-  $('hostVerifyOtp').onclick=hostVerifyOtp;
+  $('hostLogin').onclick=hostLogin;
+  $('hostPassword').addEventListener('keydown',e=>{if(e.key==='Enter')hostLogin();});
   $('hostSignOut').onclick=hostSignOut;
   $('questionUpload').addEventListener('change',e=>loadQuestions(e.target.files[0]));
   $('joinRoom').onclick=joinRoom;
@@ -384,13 +379,14 @@ async function init(){
     clean.searchParams.delete('code');
     history.replaceState({},'',clean.pathname+clean.search+clean.hash);
   }
-  // Do not create an anonymous session for MC. Email-verified account is required.
-  user=existing||(mode==='host'?null:(await signInAnonymously(auth)).user);
+  // Anonymous Supabase identity is used for phones and for the MC password RPC.
+  // Host privileges are granted separately by server-side username/password checks.
+  user=existing||(await signInAnonymously(auth)).user;
   setConnection('✓ Đã kết nối Supabase • '+MODE_LABELS[mode],true);
   $('joinRoom').disabled=false;$('watchBoard').disabled=false;
   if(mode==='host'){
     if(!code)code=readLocal('vnr202-host-code');
-    if(user&&!user.is_anonymous)await checkHostAccess();
+    if(user)await checkHostAccess();
     else renderHostAccess();
   }
   if(mode==='player'&&!code)code=readLocal('vnr202-joined-code');
@@ -403,7 +399,13 @@ async function init(){
 }
 init().catch(err=>{
   $('setupBanner').hidden=false;
-  setConnection('Không kết nối được Supabase.');
-  notify('Không thể khởi động: '+(err.message||err),true);
+  const msg=String(err.message||err);
+  const authProblem=/anonymous|sign.?up|disabled|not allowed/i.test(msg);
+  setConnection(authProblem?'Supabase đã cấu hình, nhưng đăng nhập ẩn danh đang bị từ chối.':'Không khởi động được Supabase Auth.');
+  $('setupBanner').querySelector('h2').textContent=authProblem?'Cần bật Anonymous Sign-Ins trên Supabase':'Không khởi động được dịch vụ đăng nhập';
+  $('setupBanner').querySelector('p').textContent=authProblem
+    ?'Vào Supabase → Authentication → Providers → Anonymous Sign-Ins và bật tính năng này. Sau đó tải lại trang.'
+    :'Kiểm tra kết nối mạng, cấu hình Supabase và tải lại trang. Chi tiết: '+msg;
+  notify('Lỗi đăng nhập Supabase: '+msg,true);
   console.error(err);
 });

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="Định hướng tương lai">
+ <defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2c193f"/><stop offset=".65" stop-color="#142c47"/><stop offset="1" stop-color="#181727"/></linearGradient>
+  <radialGradient id="orb"><stop offset="0" stop-color="#e9c07a" stop-opacity=".58"/><stop offset=".55" stop-color="#fb9a74" stop-opacity=".17"/><stop offset="1" stop-color="#e9c07a" stop-opacity="0"/></radialGradient>
+  <linearGradient id="textshine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff8e6"/><stop offset=".8" stop-color="#e9c07a"/></linearGradient>
+  <pattern id="dots" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.3" fill="#fff" opacity=".16"/></pattern>
+  <filter id="glow"><feGaussianBlur stdDeviation="12"/></filter>
+ </defs>
+ <rect width="1200" height="675" fill="url(#bg)"/>
+ <rect width="1200" height="675" fill="url(#dots)" opacity=".6"/>
+ <path d="M0 610 Q270 470 510 645 T1200 540 V675 H0Z" fill="#e9c07a" opacity=".045"/>
+ <path d="M0 562 Q300 385 640 584 T1200 500" fill="none" stroke="#e9c07a" stroke-opacity=".24" stroke-width="2"/>
+ <path d="M-80 550 L460 -20 M25 690 L650 20 M930 -35 L1280 340" stroke="#fff" stroke-opacity=".05" stroke-width="3"/>
+ <rect x="36" y="36" width="1128" height="603" rx="38" fill="none" stroke="#e9c07a" stroke-opacity=".27" stroke-width="2"/>
+ <path d="M66 78 h95 M66 78 v95 M1134 597 h-95 M1134 597 v-95" stroke="#e9c07a" stroke-width="3" stroke-opacity=".7" fill="none" stroke-linecap="round"/>
+ <g transform="translate(886 309)">
+  <circle r="284" fill="url(#orb)"/>
+  <circle r="198" stroke="#e9c07a" stroke-opacity=".17" stroke-width="3" fill="none"/>
+  <circle r="165" stroke="#e9c07a" stroke-opacity=".4" stroke-width="3" fill="none" stroke-dasharray="11 14"/>
+  <circle r="126" fill="#e9c07a" fill-opacity=".07" stroke="#e9c07a" stroke-opacity=".4" stroke-width="1.5"/>
+  <path d="M-215 0H-180 M180 0H215 M0 -215V-180 M0 180V215" stroke="#e9c07a" stroke-opacity=".7" stroke-width="3"/>
+  <text x="0" y="53" text-anchor="middle" font-size="170" font-family="Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,DejaVu Sans" dominant-baseline="central">📈</text>
+  <circle cx="-148" cy="-143" r="8" fill="#e9c07a"/><circle cx="166" cy="115" r="5" fill="#fff" opacity=".7"/>
+ </g>
+ <rect x="92" y="102" width="315" height="42" rx="21" fill="#e9c07a" fill-opacity=".14" stroke="#e9c07a" stroke-opacity=".6"/>
+ <text x="112" y="130" font-family="Arial,sans-serif" font-size="16" letter-spacing="2" font-weight="bold" fill="#e9c07a">VÒNG 01 / DẤU MỐC LỊCH SỬ</text>
+ <text x="94" y="225" font-size="19" letter-spacing="7" font-weight="700" fill="#e4cee0" font-family="Arial,sans-serif">HÀNH TRÌNH ĐỔI MỚI</text>
+ <text x="90" y="320" font-size="61" font-weight="900" font-family="Arial,sans-serif" fill="url(#textshine)" textLength="635" lengthAdjust="spacingAndGlyphs">Định hướng tương lai</text>
+ <rect x="94" y="352" width="240" height="5" rx="2" fill="#e9c07a"/>
+ <text x="94" y="404" font-size="18" letter-spacing="2.3" font-weight="600" font-family="Arial,sans-serif" fill="#f0deec" opacity=".9">KHÁM PHÁ · SUY LUẬN · CHỌN ĐÁP ÁN</text>
+ <path d="M94 520h500" stroke="#fff" stroke-opacity=".2" stroke-width="2"/>
+ <text x="94" y="555" font-size="21" letter-spacing="5" font-weight="800" font-family="Arial,sans-serif" fill="#e9c07a">CÂU 03 · R3</text>
+ <g transform="translate(440 558)" fill="#e9c07a"><circle r="6"/><circle cx="28" r="6" opacity=".55"/><circle cx="56" r="6" opacity=".25"/></g>
+ </svg>

@@ -212,7 +212,7 @@ test('Phòng đã bắt đầu khóa đội mới, kết thúc chặn đăng ký
  }
  assert.match(css,/\.player-closed-panel/);
  assert.match(css,/\.player-finished-panel/);
- assert.match(html,/live\.js\?v=room-switch7/);
+ assert.match(html,/live\.js\?v=photo8/);
  assert.match(js,/supabase-adapter\.js\?v=room-switch7/);
 });
 

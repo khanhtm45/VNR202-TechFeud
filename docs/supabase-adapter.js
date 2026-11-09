@@ -147,6 +147,8 @@ export function onSnapshot(ref, callback, onError) {
     .on('postgres_changes',{event:'*',schema:'public',table,filter:key+'=eq.'+code},()=>refresh())
     .subscribe(s=>{if(s==='SUBSCRIBED')refresh();});
   refresh();
-  const timer=setInterval(refresh,9500);
+  // Realtime normally updates immediately. Poll teams more often as a fallback
+  // for school Wi-Fi networks where websocket change notifications may be dropped.
+  const timer=setInterval(refresh,kind==='teams'?4000:9500);
   return ()=>{closed=true;clearInterval(timer);client.removeChannel(channel);};
 }

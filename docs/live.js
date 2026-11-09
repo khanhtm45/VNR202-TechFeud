@@ -313,21 +313,24 @@ function renderHost(){
   renderTeams('hostTeams');
   showText('teamCount',teams.length+'/8 đội');
   const host=hostAuthorized&&room?.hostUid===user?.uid;
+  const phase=roomPhase();
   renderHostAnswerProgress(host);
-  $('hostRoomCard').hidden=!room||!host||room.status!=='lobby';
-  $('hostRoomClosed').hidden=!(room&&host&&room.status!=='lobby');
-  if(room&&host&&room.status!=='lobby')
-    showText('hostRoomClosed',room.status==='finished'
+  $('hostRoomCard').hidden=!room||!host||phase!=='lobby';
+  $('hostRoomClosed').hidden=!(room&&host&&phase!=='lobby');
+  if(room&&host&&phase!=='lobby')
+    showText('hostRoomClosed',phase==='finished'
       ?'🏁 Gameshow đã kết thúc. Phòng đã đóng, không thể thêm đội mới.'
-      :'🔒 MC đã bắt đầu! Đăng ký đội mới đã khóa; các đội đã tham gia vẫn có thể chơi tiếp.');
+      :phase==='expired'
+        ?'⌛ Phòng đã hết hạn. Hãy tạo một phòng mới để tiếp tục chơi.'
+        :'🔒 MC đã bắt đầu! Đăng ký đội mới đã khóa; các đội đã tham gia vẫn có thể chơi tiếp.');
   $('createRoom').disabled=!privateQuestions||!user||!hostAuthorized;
   if(room&&host){
     showText('hostRoomCode',code);
     showText('hostJoinCount',teams.length+'/8 đội đã tham gia');
     if(mode==='host')renderQr('host');
   }
-  const active=room?.status||'Chưa tạo phòng';
-  const labels={lobby:'Chờ đội',question:'Đang nhận đáp án',revealed:'Đã chấm điểm',finished:'Hoàn thành'};
+  const active=phase||'Chưa tạo phòng';
+  const labels={lobby:'Chờ đội',question:'Đang nhận đáp án',revealed:'Đã chấm điểm',finished:'Hoàn thành',expired:'Hết hạn'};
   showText('hostStatus',labels[active]||active);
   const q=room?.current;
   const hostPrompt=$('hostPrompt');
@@ -338,10 +341,11 @@ function renderHost(){
     art.alt='Hình minh họa câu '+(q.number||'');
     hostPrompt.append(art);
   }
-  hostPrompt.append(element('p','',q?.prompt||(room?.status==='finished'?'Gameshow đã kết thúc.':'Đang chờ MC tạo phòng hoặc bắt đầu câu hỏi.')));
-  const isLobby=room?.status==='lobby',isRevealed=room?.status==='revealed';
+  hostPrompt.append(element('p','',phase==='expired'?'Phòng đã hết hạn. Hãy tạo phòng mới.':
+    q?.prompt||(phase==='finished'?'Gameshow đã kết thúc.':'Đang chờ MC tạo phòng hoặc bắt đầu câu hỏi.')));
+  const isLobby=phase==='lobby',isRevealed=phase==='revealed';
   $('nextQuestion').disabled=!host||!teams.length||!(isLobby||isRevealed);
-  $('revealQuestion').disabled=!host||room?.status!=='question';
+  $('revealQuestion').disabled=!host||phase!=='question';
   if(room?.status==='question'){
     const done=teams.filter(t=>t.answeredCursor===room.cursor).length;
     showText('revealQuestion','✓ Công bố và chấm điểm ('+done+'/'+teams.length+' đội)');
@@ -432,11 +436,12 @@ function renderPlayer(){
 function renderBoard(){
   renderTeams('boardTeams');
   showText('boardRoomCode','PHÒNG '+(code||'------'));
-  const statusLabels={lobby:'Đang chờ các đội',question:'Đang thi',revealed:'Đã chấm điểm',finished:'Bảng xếp hạng'};
-  showText('boardStatus',statusLabels[room?.status]||'Chưa kết nối');
-  const waiting=room?.status==='lobby'&&code.length===6;
+  const phase=roomPhase();
+  const statusLabels={lobby:'Đang chờ các đội',question:'Đang thi',revealed:'Đã chấm điểm',finished:'Bảng xếp hạng',expired:'Phòng đã hết hạn'};
+  showText('boardStatus',statusLabels[phase]||'Chưa kết nối');
+  const waiting=phase==='lobby'&&code.length===6;
   $('boardLobby').hidden=!waiting;
-  $('boardMainQuestion').hidden=waiting||room?.status==='finished';
+  $('boardMainQuestion').hidden=waiting||phase==='finished';
   if(waiting){
     showText('boardJoinCode',code);
     showText('boardJoinCount',teams.length+'/8 ĐỘI ĐÃ THAM GIA');
@@ -444,11 +449,12 @@ function renderBoard(){
   }
   const q=room?.current;
   showText('boardRound',q?.stageLabel?.toLocaleUpperCase('vi')||'HÀNH TRÌNH ĐỔI MỚI');
-  showText('boardPrompt',q?.prompt||(room?.status==='finished'?'🏆 KẾT QUẢ CHUNG CUỘC':'Các đội hãy vào phòng bằng mã QR hoặc mã phòng.'));
+  showText('boardPrompt',phase==='expired'?'⌛ Phòng đã hết hạn. Hãy lấy mã phòng mới từ MC.':
+    q?.prompt||(phase==='finished'?'🏆 KẾT QUẢ CHUNG CUỘC':'Các đội hãy vào phòng bằng mã QR hoặc mã phòng.'));
   syncArt('boardArtWrap','boardArt',q);
   renderQuestion('boardChoices');
-  $('boardChoices').hidden=!q;
-  $('boardReveal').hidden=room?.status!=='revealed';
+  $('boardChoices').hidden=!q||phase==='expired';
+  $('boardReveal').hidden=phase!=='revealed';
   showText('boardReveal',room?.status==='revealed'?'Đáp án: '+LETTERS[room.reveal.correctIndex]+'. '+room.reveal.correctText+' — '+room.reveal.explanation:'');
   const results=$('leaderboard');
   results.hidden=room?.status!=='finished';
@@ -501,14 +507,14 @@ function updateClocks(){
   const time=remaining();
   for(const id of ['hostTimer','playerTimer','boardTimer'])showText(id,formatClock(time));
   // MC remains authoritative: when the timer ends, trigger server-side scoring exactly once.
-  if(room?.status==='question'&&room.hostUid===user?.uid&&time===0){
+  if(roomPhase()==='question'&&room.hostUid===user?.uid&&time===0){
     const key=code+'_'+room.cursor;
     if(closingKey!==key){
       closingKey=key;
       control('REVEAL').catch(()=>{}).finally(()=>{setTimeout(()=>{if(closingKey===key)closingKey='';},3500);});
     }
   }
-  if(mode==='player'&&room?.status==='question'&&time===0)
+  if(mode==='player'&&roomPhase()==='question'&&time===0)
     $('playerChoices').querySelectorAll('button').forEach(b=>{b.disabled=true;});
 }
 async function createRoom(){

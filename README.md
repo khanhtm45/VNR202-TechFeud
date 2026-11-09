@@ -64,6 +64,16 @@ Gameshow môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại h
 | **Phòng hết hạn** | Bị từ chối | Cần phòng mới |
 
 Supabase kiểm tra khi nộp yêu cầu vào phòng và đồng bộ trạng thái qua RPC `vnr_room_join_status`, với kiểm tra trạng thái thật trong `vnr_join_room` để tránh đăng ký lọt giữa lúc MC bắt đầu. Người nhập mã QR muộn sẽ thấy lý do phòng khóa thay vì màn hình **Đợi MC bắt đầu**. MC ẩn QR mời đội mới sau lúc bắt đầu.
+## 🔁 Rời phòng và chuyển sang phòng khác trên điện thoại
+
+- Màn hình **Đội chơi** luôn có nút **Đổi phòng / nhập mã mới** khi đang ở một phòng, kể cả lúc chờ, đang trả lời, vừa công bố, đã kết thúc hoặc đã hết hạn.
+- Đang làm câu hỏi sẽ hiện xác nhận để tránh vô tình bỏ lỡ lượt trả lời; những trạng thái khác đổi phòng trực tiếp.
+- Thao tác đổi phòng ngừng nghe phòng cũ, xóa mã phòng khỏi URL và bộ nhớ phòng gần đây, rồi mở lại form **Mã phòng + Tên đội**. Không đăng xuất Supabase.
+- Nếu truy cập từ QR đến phòng đã kết thúc/hết hạn, dùng nút **Nhập mã phòng khác**; đội cũ vẫn có thể xem kết quả nếu vào bằng link trực tiếp.
+- Nếu một phòng đã kết thúc/hết hạn còn được ghi nhớ từ lần trước, tải lại trang sẽ **trở về ô nhập mã mới**, không tự giữ điện thoại trong phòng cũ.
+- **Không xóa tư cách thành viên hoặc điểm số ở phòng trước**: đội có thể vẫn có mặt trên bảng xếp hạng của trận cũ; chuyển sang phòng mới là một phiên tham gia riêng.
+- Kiểm thử mô phỏng JavaScript ở `test/multiplayer.test.js` bao gồm phòng kết thúc, hết hạn, đang thi, hành động hủy rời phòng và phản hồi mạng đến muộn.
+
 ## 🖥 Chế độ một máy — dự phòng khi không có backend
 
 **[Mở giao diện gốc](https://khanhtm45.github.io/VNR202-TechFeud/)**

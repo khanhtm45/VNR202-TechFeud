@@ -265,3 +265,33 @@ body[data-game-status="revealed"] .answer-reveal{
   .choices .correct,.leaderboard,body[data-game-status="revealed"] .answer-reveal{animation:none}
   .choices button,.live-team{transition:none}
 }
+
+
+/* Confirmed team registration: dedicated waiting screen (phone + tablet). */
+.player-waiting{
+  text-align:center;
+  border:1px solid #d5b5768d;
+  border-radius:20px;
+  background:radial-gradient(circle at 50% 3%,#deb27227,transparent 50%),linear-gradient(145deg,#403047,#222c3e);
+  padding:24px 18px 26px;
+  margin-top:18px;
+  box-shadow:inset 0 1px #ffe5bc2b,0 15px 30px #0002;
+}
+.player-waiting .waiting-sparkles{letter-spacing:12px;font-size:23px;line-height:1.6;color:#ffe2a1}
+.player-waiting .waiting-pill{
+  display:inline-block;margin:8px auto 14px;
+  padding:7px 15px;border:1px solid #8de8c6aa;border-radius:100px;
+  background:#265e5388;color:#a4fce0;font-size:11px;font-weight:900;letter-spacing:.13em;
+}
+.player-waiting h3{font:900 clamp(24px,5vw,34px)/1.3 Georgia,serif;color:#ffe6b4;margin:4px 0 10px}
+.player-waiting p{color:#e4d8e6;max-width:490px;margin:0 auto 20px;font-size:14px;line-height:1.65}
+.waiting-room-label{font-weight:900;font-size:10px;letter-spacing:.2em;color:#ceb0cd}
+.waiting-room-code{color:#fff0af;font-weight:900;font-size:clamp(36px,8vw,54px);letter-spacing:.16em;font-variant-numeric:tabular-nums;margin:4px 0}
+.waiting-room-count{font-size:13px;color:#f5d0a0;font-weight:800}
+.player-game:has(.player-waiting:not([hidden])) .live-question{
+  opacity:.75;
+}
+@media(max-width:480px){
+  .player-waiting{padding:18px 11px 24px}
+  .waiting-room-code{letter-spacing:.08em}
+}

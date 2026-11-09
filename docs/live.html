@@ -6,8 +6,8 @@
 <title>VNR202 · Gameshow trực tuyến 8 đội</title>
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="stylesheet" href="./styles.css?v=2">
-<link rel="stylesheet" href="./live.css?v=room-switch7">
-<script type="module" src="./live.js?v=room-switch7"></script>
+<link rel="stylesheet" href="./live.css?v=photo8">
+<script type="module" src="./live.js?v=photo8"></script>
 </head>
 <body class="live-page">
 <div class="page live-shell">
@@ -18,14 +18,14 @@
       <p>Phòng thi trực tuyến • 3 vòng • Tối đa 8 đội</p>
     </div>
     <div class="live-nav" aria-label="Chọn màn hình">
-      <button type="button" data-mode="host">🎛 MC</button>
-      <button type="button" data-mode="player">📱 Đội chơi</button>
-      <button type="button" data-mode="board">📺 Máy chiếu</button>
+      <button type="button" data-mode="host">MC</button>
+      <button type="button" data-mode="player">Đội chơi</button>
+      <button type="button" data-mode="board">Máy chiếu</button>
       <a href="./index.html" class="live-back">↗ Bản chơi trên một máy</a>
     </div>
   </header>
 
-  <div class="connection-tools"><div id="connection" class="connection" role="status">Đang khởi tạo…</div><a class="connection" href="./status.html" target="_blank" rel="noopener" title="Kiểm tra trực tiếp từ trình duyệt">🔍 Kiểm tra Supabase</a></div>
+  <div class="connection-tools"><div id="connection" class="connection" role="status">Đang khởi tạo…</div><a class="connection" href="./status.html" target="_blank" rel="noopener" title="Kiểm tra trực tiếp từ trình duyệt">Kiểm tra Supabase</a></div>
   <section id="setupBanner" class="live-alert" hidden>
     <h2>Chưa kết nối Supabase</h2>
     <p>Website đã có giao diện phòng chơi nhưng cần cấu hình Supabase Free của bạn để các điện thoại kết nối. Xem hướng dẫn trong <a href="https://github.com/khanhtm45/VNR202-TechFeud/blob/main/SUPABASE_SETUP.md">MULTIPLAYER_SETUP.md</a>. Không nên sử dụng thử như một phòng chơi thật khi chưa cấu hình.</p>
@@ -35,7 +35,7 @@
     <section id="hostScreen" class="live-screen" hidden>
       <div class="live-heading"><span class="live-kicker">DÀNH CHO NGƯỜI ĐIỀU KHIỂN</span><h2>Điều khiển gameshow</h2><p>MC tạo phòng, chọn bộ câu hỏi riêng và điều phối các vòng thi.</p></div>
       <div id="hostAuthPanel" class="live-panel host-auth-panel">
-        <h3>🔐 Đăng nhập MC</h3>
+        <h3>Đăng nhập MC</h3>
         <p>Chỉ MC có tài khoản được kích hoạt trong Supabase mới có thể tạo và điều khiển phòng thi. Đội chơi không cần đăng nhập MC.</p>
         <label class="field-label" for="hostUsername">Tên đăng nhập MC</label>
         <input id="hostUsername" type="text" maxlength="32" autocomplete="username" placeholder="Tên đăng nhập MC">
@@ -61,7 +61,7 @@
           <div class="form-row"><input id="hostCode" maxlength="6" inputmode="numeric" placeholder="6 chữ số"><button id="resumeHost" type="button" class="live-button">Mở</button></div>
           <div id="hostRoomClosed" class="host-room-closed" hidden>🔒 Đã khóa đăng ký đội mới. Chỉ các đội đã tham gia trước đó mới tiếp tục chơi.</div>
           <div id="hostRoomCard" class="host-room-card" hidden>
-            <div class="qr-invite-icon" aria-hidden="true">✦ QR VÀO PHÒNG ✦</div>
+            <div class="qr-invite-icon" aria-hidden="true">QR VÀO PHÒNG</div>
             <h4>Quét để tham gia ngay</h4>
             <div class="qr-wrap"><img id="qrImage" alt="Mã QR dẫn đến trang đăng ký đội chơi" width="292" height="292" loading="eager"></div>
             <p class="live-muted qr-caption">Mở camera điện thoại và quét mã này</p>
@@ -69,8 +69,8 @@
             <div id="hostRoomCode" class="room-code">------</div>
             <div id="hostJoinCount" class="qr-join-count">0/8 đội đã tham gia</div>
             <p class="live-muted small">1 điện thoại đại diện/đội · Tối đa 8 đội · Ít nhất 1 đội có thể bắt đầu</p>
-            <button id="copyJoinLink" type="button" class="live-button">📋 Sao chép đường dẫn tham gia</button>
-            <button id="openBoard" type="button" class="live-button primary">📺 Mở màn hình chờ có QR</button>
+            <button id="copyJoinLink" type="button" class="live-button">Sao chép đường dẫn tham gia</button>
+            <button id="openBoard" type="button" class="live-button primary">Mở màn hình chờ có QR</button>
           </div>
         </aside>
         <div class="host-stage">
@@ -156,8 +156,9 @@
           </div>
           <div id="playerQuestionArea" class="live-question">
             <div id="playerRound" class="live-kicker"></div>
-            <figure id="playerArtWrap" class="question-art player-art" hidden>
-              <img id="playerArt" src="" alt="Hình minh họa cho câu hỏi" loading="eager" decoding="async">
+            <figure id="playerArtWrap" class="question-art player-art photo-frame" hidden>
+              <img id="playerArt" src="" alt="Ảnh minh họa chủ đề câu hỏi" loading="eager" decoding="async">
+              <figcaption class="photo-credit"></figcaption>
             </figure>
             <h3 id="playerPrompt">Hãy chuẩn bị!</h3>
             <div id="playerTimer" class="countdown">00:00</div>
@@ -192,8 +193,9 @@
       <div id="boardMainQuestion" class="live-panel board-main-question">
         <p id="boardRound" class="live-kicker">HÀNH TRÌNH ĐỔI MỚI</p>
         <div class="board-question-layout">
-          <figure id="boardArtWrap" class="question-art board-art" hidden>
-            <img id="boardArt" src="" alt="Hình minh họa cho câu hỏi đang trình chiếu" loading="eager" decoding="async">
+          <figure id="boardArtWrap" class="question-art board-art photo-frame" hidden>
+            <img id="boardArt" src="" alt="Ảnh minh họa chủ đề câu hỏi đang trình chiếu" loading="eager" decoding="async">
+            <figcaption class="photo-credit"></figcaption>
           </figure>
           <div class="board-question-copy">
             <h2 id="boardPrompt">Các đội hãy vào phòng bằng mã QR hoặc mã phòng.</h2>

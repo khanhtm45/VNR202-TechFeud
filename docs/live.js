@@ -18,6 +18,7 @@ let code=/^\d{6}$/.test(urlCode)?urlCode:'';
 let app,auth,db,functions,user,room,teams=[],privateQuestions=null,hostAuthorized=false;
 let unRoom=null,unTeams=null,joinedCode='',optimisticMember=null,joinRoomInfo=null,selectedChoice=null,submitting=false,closingKey='',latestCursor=-1;
 let playerRoomEpoch=0; // Cancels stale join/status responses when the player switches rooms.
+let submitToken=0;
 let toastTimer=null;
 
 function showText(id,value){const el=$(id);if(el)el.textContent=value==null?'':String(value);}
@@ -74,6 +75,8 @@ function clearPlayerRoom(){
     !confirm('Câu hỏi đang diễn ra. Chuyển phòng sẽ đóng màn hình trả lời ở phòng này. Bạn vẫn có thể quay lại nếu trận chưa kết thúc. Tiếp tục?'))
     return;
   playerRoomEpoch++;
+  submitToken++;
+  submitting=false;
   stopListening();
   room=null;teams=[];optimisticMember=null;joinRoomInfo=null;joinedCode='';
   selectedChoice=null;latestCursor=-1;
@@ -480,19 +483,28 @@ function render(){
   updateClocks();
 }
 async function submitChoice(index){
-  if(!room||room.status!=='question'||submitting)return;
-  const member=getMember();if(!member)return notify('Bạn phải tham gia phòng trước.',true);
+  if(!room||roomPhase()!=='question'||submitting)return;
+  const member=getMember();
+  if(!member)return notify('Bạn phải tham gia phòng trước.',true);
+  const answerCode=code,answerCursor=room.cursor,answerUid=user.uid;
+  const epoch=playerRoomEpoch,token=++submitToken;
+  const answerKey='vnr202-answer-'+answerCode+'-'+answerCursor+'-'+answerUid;
   submitting=true;selectedChoice=index;renderPlayer();
   try{
-    await call('submitAnswer',{code,choice:index});
-    saveLocal('vnr202-answer-'+code+'-'+room.cursor+'-'+user.uid,String(index));
-    notify('Đã nhận câu trả lời. Điểm sẽ hiện sau khi MC công bố.');
+    await call('submitAnswer',{code:answerCode,choice:index});
+    saveLocal(answerKey,String(index));
+    if(epoch===playerRoomEpoch)notify('Đã nhận câu trả lời. Điểm sẽ hiện sau khi MC công bố.');
   }catch(err){
     if(err.code==='functions/already-exists'){
-      saveLocal('vnr202-answer-'+code+'-'+room.cursor+'-'+user.uid,'submitted');
-      notify('Đội đã trả lời câu này.');
-    }else notify(err.message||'Gửi đáp án không thành công.',true);
-  }finally{submitting=false;render();}
+      saveLocal(answerKey,'submitted');
+      if(epoch===playerRoomEpoch)notify('Đội đã trả lời câu này.');
+    }else if(epoch===playerRoomEpoch)notify(err.message||'Gửi đáp án không thành công.',true);
+  }finally{
+    if(token===submitToken){
+      submitting=false;
+      render();
+    }
+  }
 }
 async function control(action){
   if(!hostAuthorized)return notify('Chỉ MC được cấp quyền mới có thể điều khiển.',true);
@@ -532,27 +544,34 @@ async function createRoom(){
 async function joinRoom(){
   const wanted=sanitizedCode($('joinCode').value),teamName=$('teamName').value.trim();
   if(wanted.length!==6||!teamName)return notify('Hãy nhập đủ mã phòng và tên đội.',true);
+  const epoch=playerRoomEpoch;
+  const stillHere=()=>epoch===playerRoomEpoch&&mode==='player';
   $('joinRoom').disabled=true;
   try{
     const status=await inspectRoomJoinStatus(wanted);
+    if(!stillHere())return;
     if(!status)return notify('Không kiểm tra được mã phòng.',true);
     if(status.status==='finished'&&status.member){
-      // An already-registered team may view its final result, without a new join RPC.
+      // Existing teams may still view the result; switching remains available.
       saveLocal('vnr202-joined-code',wanted);
       watchRoom(wanted);
-      notify('🏁 Gameshow đã kết thúc. Đây là kết quả đội của bạn.');
+      notify('🏁 Gameshow đã kết thúc. Bạn có thể xem điểm hoặc đổi phòng.');
+      return;
+    }
+    if(status.status==='expired'){
+      renderPlayer();
+      notify('Phòng đã hết hạn. Hãy bấm Đổi phòng để nhập mã mới.',true);
       return;
     }
     if(!status.member&&!status.canJoin){
       renderPlayer();
-      notify(status.status==='finished'?'Gameshow đã kết thúc. Không thể tham gia.':
+      notify(status.status==='finished'?'Gameshow đã kết thúc. Hãy nhập mã khác.':
         status.status==='question'||status.status==='revealed'?'MC đã bắt đầu. Phòng đã khóa đăng ký.':
         'Phòng không nhận đội mới.',true);
       return;
     }
-    if(status.status==='expired')return notify('Phòng đã hết hạn.',true);
-    // Server serializes MC start and team joins against the room row lock.
     const res=await call('joinRoom',{code:wanted,teamName});
+    if(!stillHere())return; // Do not jump back after the user switched rooms.
     joinedCode=res.code;saveLocal('vnr202-joined-code',res.code);
     joinRoomInfo=null;
     optimisticMember={code:res.code,uid:res.teamId||user?.uid,name:res.teamName,score:0,position:0};
@@ -563,10 +582,12 @@ async function joinRoom(){
       res.rejoined?'✓ Đã vào lại phòng. Chờ MC bắt đầu!':
       '✓ Đăng ký đội thành công! Đang chờ MC bắt đầu.');
   }catch(err){
-    // The MC may have started between status lookup and the join request.
+    if(!stillHere())return;
     await inspectRoomJoinStatus(wanted).catch(()=>{});
-    notify(err.message||'Vào phòng thất bại.',true);
-  }finally{$('joinRoom').disabled=false;}
+    if(stillHere())notify(err.message||'Vào phòng thất bại.',true);
+  }finally{
+    if(stillHere())$('joinRoom').disabled=false;
+  }
 }
 async function loadQuestions(file){
   if(!file)return;
@@ -599,6 +620,7 @@ function wire(){
   });
   $('playerTryOtherRoom').onclick=clearPlayerRoom;
   $('playerNewRoom').onclick=clearPlayerRoom;
+  $('playerSwitchRoom').onclick=clearPlayerRoom;
   $('joinFormPanel').addEventListener('submit',event=>{
     event.preventDefault();
     if(!$('joinRoom').disabled)joinRoom();

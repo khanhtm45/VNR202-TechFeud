@@ -1,4 +1,4 @@
-import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=room-lock6";
+import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=room-switch7";
 import {supabaseConfig,isSupabaseConfigured} from "./supabase-config.js?v=20261109-fix2";
 
 const $=id=>document.getElementById(id);

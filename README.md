@@ -46,6 +46,14 @@ Gameshow môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại h
 - Nếu muốn thay ảnh cho một câu, sửa chính SVG tương ứng trong `docs/art/questions/`, không chỉnh câu đáp án. Ảnh dự phòng của vòng áp dụng cho câu có mã ngoài bộ 20.
 - Bản này không thay luật tính điểm trong Supabase và không thay yêu cầu đăng nhập MC.
 
+## ✅ Theo dõi đội đã trả lời ngay trên màn hình MC
+
+- Khi câu hỏi đang chạy, mục **03. Điều khiển câu hỏi** hiển thị số đội đã nộp (ví dụ **2/8**), thanh tiến độ và thẻ riêng cho từng đội: **Đã gửi đáp án** hoặc **Chưa trả lời**.
+- Trạng thái do **RPC của Supabase ghi sau khi xác nhận câu trả lời**; bảng đội tự đồng bộ qua Realtime, kèm làm mới dự phòng 4 giây nếu mạng lớp yếu.
+- Sau khi tất cả đội đã nộp, MC có thể **Công bố và chấm điểm** ngay, không cần chờ hết giờ. Nếu chưa đủ, MC có thể đợi hoặc chủ động công bố.
+- Trước khi công bố, MC chỉ xem **trạng thái đã/chưa trả lời**, không hiển thị lựa chọn A/B/C/D, tính đúng sai hay điểm tạm tính. Sau khi công bố, bảng hiển thị điểm vừa cộng.
+- Chế độ này được triển khai trong migration `supabase/migrations/202611090004_live_answer_progress.sql`. Không cần MC upload lại bộ 20 câu hỏi JSON.
+
 ## 🖥 Chế độ một máy — dự phòng khi không có backend
 
 **[Mở giao diện gốc](https://khanhtm45.github.io/VNR202-TechFeud/)**

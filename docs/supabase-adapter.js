@@ -107,7 +107,9 @@ function toTeam(data) {
     name:data.name,
     position:data.position,
     score:data.score,
-    lastGain:data.last_gain
+    lastGain:data.last_gain,
+    // A public submission flag (not the chosen option or whether it was correct).
+    answeredCursor:data.answered_cursor ?? -1
   };
 }
 
@@ -131,7 +133,7 @@ export function onSnapshot(ref, callback, onError) {
         if(error)throw error;
         if(!closed)callback({exists:()=>Boolean(data),data:()=>toRoom(data)});
       }else{
-        const {data,error}=await client.from(table).select('uid,name,position,score,last_gain').eq(key,code).order('position',{ascending:true});
+        const {data,error}=await client.from(table).select('uid,name,position,score,last_gain,answered_cursor').eq(key,code).order('position',{ascending:true});
         if(error)throw error;
         if(!closed)callback({docs:(data||[]).map(row=>({id:row.uid,data:()=>toTeam(row)}))});
       }

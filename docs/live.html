@@ -6,8 +6,8 @@
 <title>VNR202 · Gameshow trực tuyến 8 đội</title>
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="stylesheet" href="./styles.css?v=2">
-<link rel="stylesheet" href="./live.css?v=room-lock6">
-<script type="module" src="./live.js?v=room-lock6"></script>
+<link rel="stylesheet" href="./live.css?v=room-switch7">
+<script type="module" src="./live.js?v=room-switch7"></script>
 </head>
 <body class="live-page">
 <div class="page live-shell">
@@ -111,6 +111,12 @@
 
     <section id="playerScreen" class="live-screen" hidden>
       <div class="live-heading"><span class="live-kicker">DÀNH CHO ĐẠI DIỆN ĐỘI</span><h2>Tham gia bằng điện thoại</h2><p>Quét QR trên màn hình lớp, tự nhập tên đội và trả lời trên điện thoại của đội.</p></div>
+      <div id="playerRoomToolbar" class="player-room-toolbar" hidden>
+        <span id="playerCurrentRoom" class="player-current-room">PHÒNG ------</span>
+        <button id="playerSwitchRoom" class="live-button player-switch-button" type="button">
+          <span aria-hidden="true">↩</span> Đổi phòng / nhập mã mới
+        </button>
+      </div>
       <div class="player-layout">
         <form class="live-panel player-form" id="joinFormPanel" autocomplete="on">
           <h3>Tham gia phòng</h3>
@@ -143,8 +149,8 @@
           </div>
           <div id="playerFinishedPanel" class="player-finished-panel" hidden>
             <span class="live-kicker">🏆 VNR202 • KẾT QUẢ CHUNG CUỘC</span>
-            <h3>Gameshow đã kết thúc!</h3>
-            <p>Phòng đã đóng và không nhận đội mới. Cảm ơn đội của bạn đã tham gia.</p>
+            <h3 id="playerFinishedTitle">Gameshow đã kết thúc!</h3>
+            <p id="playerFinishedMessage">Phòng đã đóng và không nhận đội mới. Cảm ơn đội của bạn đã tham gia.</p>
             <div id="playerFinishedScore" class="player-finished-score">0 điểm</div>
             <button id="playerNewRoom" type="button" class="live-button">↩ Tham gia phòng mới</button>
           </div>

@@ -681,22 +681,37 @@ async function init(){
     if(user)await checkHostAccess();
     else renderHostAccess();
   }
+  let restoredFromCache=false;
   if(mode==='player'&&!code){
-    code=readLocal('vnr202-joined-code');
-    if(code)setCode(code);
+    const saved=sanitizedCode(readLocal('vnr202-joined-code'));
+    if(saved.length===6){
+      code=saved;
+      restoredFromCache=true;
+      setCode(code);
+    }
   }
   if(code&&(mode!=='host'||hostAuthorized)){
     if(mode==='board'){
       try{await call('authorizeSpectator',{code});watchRoom(code);}
       catch(err){notify(err.message||'Không thể xem phòng.',true);render();}
     }else if(mode==='player'){
-      // A QR link does not grant membership. Check state first, so closed rooms
-      // never appear to accept a new player.
+      // A shared QR is not membership. Don't automatically reopen a stale
+      // FINISHED/EXPIRED room from localStorage after page refresh.
+      const target=code,epoch=playerRoomEpoch;
       try{
-        const status=await inspectRoomJoinStatus(code);
-        if(status?.member && status.status!=='expired')watchRoom(code);
-        else render();
-      }catch(err){notify('Không kiểm tra được trạng thái phòng: '+err.message,true);render();}
+        const status=await inspectRoomJoinStatus(target);
+        if(epoch!==playerRoomEpoch||code!==target)return;
+        if(restoredFromCache&&['finished','expired','not_found','invalid'].includes(status?.status)){
+          clearPlayerRoom();
+          notify('Phòng cũ đã đóng hoặc hết hạn. Bạn có thể nhập mã phòng mới.');
+        }else if(status?.member&&status.status!=='expired'){
+          watchRoom(target);
+        }else render();
+      }catch(err){
+        if(epoch===playerRoomEpoch)
+          notify('Không kiểm tra được trạng thái phòng: '+err.message,true);
+        render();
+      }
     }else watchRoom(code);
   }else render();
 }

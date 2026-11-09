@@ -340,7 +340,7 @@ function renderPlayer(){
   const member=getMember();
   const currentInput=sanitizedCode($('joinCode').value);
   const info=mode==='player'&&joinRoomInfo?.code===currentInput?joinRoomInfo:null;
-  const blocked=Boolean(!member&&info&&!(info.status==='lobby'&&info.canJoin));
+  const blocked=Boolean(!member&&info&&!info.member&&!(info.status==='lobby'&&info.canJoin));
   $('joinFormPanel').hidden=Boolean(member)||blocked;
   $('playerClosedPanel').hidden=!blocked;
   $('playerGame').hidden=!member;
@@ -549,6 +549,7 @@ function wire(){
     if(mode==='player')renderPlayer();
   });
   $('playerTryOtherRoom').onclick=clearPlayerRoom;
+  $('playerNewRoom').onclick=clearPlayerRoom;
   $('joinFormPanel').addEventListener('submit',event=>{
     event.preventDefault();
     if(!$('joinRoom').disabled)joinRoom();
@@ -609,7 +610,10 @@ async function init(){
     if(user)await checkHostAccess();
     else renderHostAccess();
   }
-  if(mode==='player'&&!code)code=readLocal('vnr202-joined-code');
+  if(mode==='player'&&!code){
+    code=readLocal('vnr202-joined-code');
+    if(code)setCode(code);
+  }
   if(code&&(mode!=='host'||hostAuthorized)){
     if(mode==='board'){
       try{await call('authorizeSpectator',{code});watchRoom(code);}

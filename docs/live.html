@@ -6,8 +6,8 @@
 <title>VNR202 · Gameshow trực tuyến 8 đội</title>
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="stylesheet" href="./styles.css?v=2">
-<link rel="stylesheet" href="./live.css?v=identity4">
-<script type="module" src="./live.js?v=identity4"></script>
+<link rel="stylesheet" href="./live.css?v=mc-progress5">
+<script type="module" src="./live.js?v=mc-progress5"></script>
 </head>
 <body class="live-page">
 <div class="page live-shell">
@@ -81,13 +81,27 @@
           <div class="live-panel">
             <div class="section-line"><h3>03. Điều khiển câu hỏi</h3><div id="hostStatus" class="status-pill">Chưa tạo phòng</div></div>
             <div id="hostPrompt" class="prompt-box"><p>Đang chờ MC tạo phòng.</p></div>
+            <section id="hostAnswerTracker" class="host-answer-tracker" hidden aria-label="Tiến độ trả lời của các đội">
+              <div class="host-answer-top">
+                <div>
+                  <span class="live-kicker">TRẠNG THÁI ĐỘI CHƠI • TRỰC TIẾP</span>
+                  <h4>Đội nào đã trả lời?</h4>
+                </div>
+                <strong id="hostAnswerCount" class="host-answer-count">0/0 đội</strong>
+              </div>
+              <div id="hostAnswerProgress" class="host-answer-progress" role="progressbar" aria-label="Tỷ lệ đội đã trả lời" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div id="hostAnswerFill" class="host-answer-fill"></div>
+              </div>
+              <div id="hostAnswerList" class="host-answer-list"></div>
+              <p id="hostAnswerHint" class="host-answer-hint" role="status">Đang nhận câu trả lời…</p>
+            </section>
             <div id="hostTimer" class="countdown">00:00</div>
             <div id="hostActions" class="live-actions">
               <button id="nextQuestion" class="live-button primary" type="button" disabled>▶ Bắt đầu / Câu tiếp theo</button>
               <button id="revealQuestion" class="live-button" type="button" disabled>✓ Công bố và tự chấm điểm</button>
               <button id="finishGame" class="live-button danger" type="button" disabled>🏆 Kết thúc gameshow</button>
             </div>
-            <p class="field-help">Hết giờ, bảng MC sẽ tự yêu cầu chấm điểm. Đáp án và điểm chỉ hiện sau khi kết thúc câu.</p>
+            <p class="field-help">Hết giờ, bảng MC sẽ tự yêu cầu chấm điểm. MC thấy đội nào đã gửi đáp án trong lúc thi. Đáp án đúng và điểm chỉ hiện sau khi công bố.</p>
             <div id="hostReveal" class="answer-reveal" hidden></div>
           </div>
         </div>

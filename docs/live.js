@@ -1,4 +1,4 @@
-import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=identity4";
+import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=mc-progress5";
 import {supabaseConfig,isSupabaseConfigured} from "./supabase-config.js?v=20261109-fix2";
 
 const $=id=>document.getElementById(id);
@@ -233,10 +233,50 @@ function renderQuestion(target,interactive=false){
     section.append(button);
   });
 }
+function renderHostAnswerProgress(isHost){
+  const active=isHost&&(room?.status==='question'||room?.status==='revealed');
+  const panel=$('hostAnswerTracker');
+  panel.hidden=!active;
+  if(!active)return;
+  const participants=sortedTeams();
+  const total=participants.length;
+  const submitted=participants.filter(t=>t.answeredCursor===room.cursor).length;
+  const percent=total?Math.round(submitted*100/total):0;
+  showText('hostAnswerCount',submitted+'/'+total+' đội đã trả lời');
+  const progress=$('hostAnswerProgress');
+  progress.setAttribute('aria-valuenow',String(percent));
+  $('hostAnswerFill').style.width=percent+'%';
+  $('hostAnswerFill').classList.toggle('complete',total>0&&submitted===total);
+
+  const frag=document.createDocumentFragment();
+  for(const team of participants){
+    const done=team.answeredCursor===room.cursor;
+    const tile=element('div','host-answer-item '+(done?'answered':'pending'));
+    const indicator=element('span','host-answer-indicator',done?'✓':'…');
+    indicator.setAttribute('aria-hidden','true');
+    const detail=element('div','host-answer-detail');
+    detail.append(element('strong','',team.name));
+    const label=room.status==='revealed'
+      ?done?'Đã nộp đáp án':'Không nộp đáp án'
+      :done?'Đã gửi đáp án':'Chưa trả lời';
+    detail.append(element('span','',label));
+    tile.append(indicator,detail);
+    if(room.status==='revealed')
+      tile.append(element('span','host-answer-points','+'+(team.lastGain||0)+' điểm'));
+    frag.append(tile);
+  }
+  $('hostAnswerList').replaceChildren(frag);
+  showText('hostAnswerHint',room.status==='revealed'
+    ?'Điểm đã được chấm và công bố. MC có thể chuyển sang câu tiếp theo.'
+    :total>0&&submitted===total
+      ?'✓ Tất cả đội đã gửi đáp án! MC có thể công bố điểm ngay, không cần chờ hết giờ.'
+      :'Còn '+(total-submitted)+' đội chưa trả lời. Có thể chờ thêm hoặc công bố khi MC quyết định.');
+}
 function renderHost(){
   renderTeams('hostTeams');
   showText('teamCount',teams.length+'/8 đội');
   const host=hostAuthorized&&room?.hostUid===user?.uid;
+  renderHostAnswerProgress(host);
   $('hostRoomCard').hidden=!room||!host;
   $('createRoom').disabled=!privateQuestions||!user||!hostAuthorized;
   if(room&&host){
@@ -260,6 +300,10 @@ function renderHost(){
   const isLobby=room?.status==='lobby',isRevealed=room?.status==='revealed';
   $('nextQuestion').disabled=!host||!teams.length||!(isLobby||isRevealed);
   $('revealQuestion').disabled=!host||room?.status!=='question';
+  if(room?.status==='question'){
+    const done=teams.filter(t=>t.answeredCursor===room.cursor).length;
+    showText('revealQuestion','✓ Công bố và chấm điểm ('+done+'/'+teams.length+' đội)');
+  }else showText('revealQuestion','✓ Công bố và tự chấm điểm');
   $('finishGame').disabled=!host||!isRevealed;
   showText('nextQuestion',isLobby?'▶ Bắt đầu vòng thi':isRevealed?'→ Câu tiếp theo':'Đang trong câu hỏi');
   $('hostReveal').hidden=room?.status!=='revealed';

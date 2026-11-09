@@ -6,8 +6,8 @@
 <title>VNR202 · Gameshow trực tuyến 8 đội</title>
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="stylesheet" href="./styles.css?v=2">
-<link rel="stylesheet" href="./live.css?v=visual3">
-<script type="module" src="./live.js?v=visual3"></script>
+<link rel="stylesheet" href="./live.css?v=identity4">
+<script type="module" src="./live.js?v=identity4"></script>
 </head>
 <body class="live-page">
 <div class="page live-shell">
@@ -97,15 +97,15 @@
     <section id="playerScreen" class="live-screen" hidden>
       <div class="live-heading"><span class="live-kicker">DÀNH CHO ĐẠI DIỆN ĐỘI</span><h2>Tham gia bằng điện thoại</h2><p>Quét QR trên màn hình lớp, tự nhập tên đội và trả lời trên điện thoại của đội.</p></div>
       <div class="player-layout">
-        <div class="live-panel player-form" id="joinFormPanel">
+        <form class="live-panel player-form" id="joinFormPanel" autocomplete="on">
           <h3>Tham gia phòng</h3>
           <label class="field-label" for="joinCode">Mã phòng</label>
           <input id="joinCode" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" placeholder="Ví dụ: 482916" autocomplete="one-time-code">
           <label class="field-label" for="teamName">Tên đội của bạn</label>
           <input id="teamName" maxlength="32" placeholder="Ví dụ: Đội Việt Nam Xanh" autocomplete="off">
-          <button id="joinRoom" class="live-button primary" type="button" disabled>Tham gia phòng thi</button>
-          <p class="field-help">Đội dùng chính điện thoại này để trả lời. Không cần tài khoản cá nhân.</p>
-        </div>
+          <button id="joinRoom" class="live-button primary" type="submit" disabled>Tham gia phòng thi</button>
+          <p class="field-help">Nhập mã phòng và tên đội rồi nhấn Enter hoặc nút tham gia. Khi thành công bạn sẽ thấy màn hình chờ MC bắt đầu.</p>
+        </form>
         <div class="live-panel player-game" id="playerGame" hidden>
           <div class="section-line"><h3 id="myTeamName">Đội chơi</h3><span id="myScore" class="count-pill">0 điểm</span></div>
           <div id="playerStatus" class="live-muted">Đang chờ MC bắt đầu…</div>

@@ -17,6 +17,7 @@ const urlCode=(new URLSearchParams(location.search).get('code')||'').trim();
 let code=/^\d{6}$/.test(urlCode)?urlCode:'';
 let app,auth,db,functions,user,room,teams=[],privateQuestions=null,hostAuthorized=false;
 let unRoom=null,unTeams=null,joinedCode='',optimisticMember=null,joinRoomInfo=null,selectedChoice=null,submitting=false,closingKey='',latestCursor=-1;
+let playerRoomEpoch=0; // Cancels stale join/status responses when the player switches rooms.
 let toastTimer=null;
 
 function showText(id,value){const el=$(id);if(el)el.textContent=value==null?'':String(value);}
@@ -48,26 +49,41 @@ function getMember(){
 function sortedTeams(){return [...teams].sort((a,b)=>(a.position||0)-(b.position||0));}
 function rankings(){return [...teams].sort((a,b)=>(b.score||0)-(a.score||0)||(a.position||0)-(b.position||0));}
 function formatClock(ms){const total=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
-function remaining(){return room?.status==='question'?Math.max(0,(room.deadlineMs||0)-Date.now()):0;}
+function roomPhase(){
+  // FINISHED is terminal; an expired lobby/question is never a waiting room.
+  if(!room)return null;
+  if(room.status==='finished')return 'finished';
+  if(room.expiresAtMs&&room.expiresAtMs<=Date.now())return 'expired';
+  return room.status;
+}
+function remaining(){return roomPhase()==='question'?Math.max(0,(room.deadlineMs||0)-Date.now()):0;}
 function call(name,data){return httpsCallable(functions,name)(data).then(r=>r.data);}
 async function inspectRoomJoinStatus(requested){
   if(!user||!app||!/^[0-9]{6}$/.test(requested))return null;
+  const epoch=playerRoomEpoch;
   const result=await call('roomJoinStatus',{code:requested});
-  // Ignore stale async responses after another room code has been entered.
-  if(mode==='player'&&sanitizedCode($('joinCode').value)===requested){
+  // Previous RPC responses cannot restore an old room after the user switches.
+  if(epoch===playerRoomEpoch&&mode==='player'&&sanitizedCode($('joinCode').value)===requested){
     joinRoomInfo={...result,code:requested};
     renderPlayer();
   }
   return result;
 }
 function clearPlayerRoom(){
+  if(mode==='player'&&roomPhase()==='question'&&getMember() &&
+    !confirm('Câu hỏi đang diễn ra. Chuyển phòng sẽ đóng màn hình trả lời ở phòng này. Bạn vẫn có thể quay lại nếu trận chưa kết thúc. Tiếp tục?'))
+    return;
+  playerRoomEpoch++;
   stopListening();
   room=null;teams=[];optimisticMember=null;joinRoomInfo=null;joinedCode='';
+  selectedChoice=null;latestCursor=-1;
   saveLocal('vnr202-joined-code','');
   setCode('');
   const url=new URL(location.href);
   url.searchParams.delete('code');
   history.replaceState({},'',url.pathname+url.search);
+  // Do not reset Supabase Auth: one phone can belong to distinct rooms.
+  $('joinRoom').disabled=!user||!app;
   render();
   $('joinCode').focus();
 }

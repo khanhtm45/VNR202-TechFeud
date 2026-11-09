@@ -326,3 +326,46 @@ test('Runtime phone room switch: finished, expired, active and stale responses',
  assert.match(source,/const answerCode=code,answerCursor=room\.cursor/);
  assert.match(css,/\.player-room-toolbar/);
 });
+
+
+test('Bộ 20 câu được ghép ảnh tư liệu đúng chủ đề và không lộ đáp án',()=>{
+ const vm=require('node:vm');
+ const root=path.join(__dirname,'../docs');
+ const manifest=fs.readFileSync(path.join(root,'art/question-photos.js'),'utf8');
+ const frontend=fs.readFileSync(path.join(root,'live.js'),'utf8');
+ const html=fs.readFileSync(path.join(root,'live.html'),'utf8');
+ const css=fs.readFileSync(path.join(root,'live.css'),'utf8');
+ const fallback=fs.readFileSync(path.join(root,'art/photo-fallback.svg'),'utf8');
+ const code=manifest.replaceAll('export const ','const ').replaceAll('export function ','function ');
+ const context={};
+ vm.runInNewContext(code+';globalThis.publicPhotos=QUESTION_PHOTOS;globalThis.getPhoto=getQuestionPhoto;',context);
+ const photoIds=['r1','r2','r3','r4','r5','r6','r7','r8','f1','f2','f3','f4','f5','f6','g1','g2','g3','g4','g5','g6'];
+ assert.deepEqual(Object.keys(context.publicPhotos).sort(),photoIds.sort());
+ for(const id of photoIds){
+   const q={id,stage:id[0]==='r'?'rapid':id[0]==='f'?'feud':'green'};
+   const photo=context.getPhoto(q);
+   assert.equal(photo.id,id);
+   assert.match(photo.url,/^https:\/\/commons\.wikimedia\.org\/wiki\/Special:FilePath\//);
+   assert.match(photo.source,/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+   assert.match(photo.fallback,/^\.\/art\/photo-fallback\.svg$/);
+   assert.ok(photo.credit&&photo.alt);
+   assert.ok(!/correctIndex|correctText|choice|score|answer/i.test(JSON.stringify(context.publicPhotos[id])));
+ }
+ assert.equal(context.getPhoto({id:'unknown',stage:'rapid'}),null);
+ assert.match(frontend,/import \{getQuestionPhoto\} from/);
+ assert.match(frontend,/function attachQuestionPhoto\(img,q\)/);
+ assert.match(frontend,/function updatePhotoCredit\(fig,photo\)/);
+ assert.match(frontend,/function syncArt\(wrapId,imgId,q/);
+ assert.match(frontend,/attachQuestionPhoto\(art,q\)/);
+ assert.match(frontend,/unavailablePhotos\.add\(desired\)/);
+ assert.match(frontend,/photo\.credit\|\|'Wikimedia Commons'/);
+ assert.match(fallback,/<svg\s/);
+ assert.ok(!/Segoe UI Emoji/.test(fallback),'Photo fallback should not be a giant emoji');
+ assert.match(css,/\.question-art\.photo-frame/);
+ assert.match(css,/\.host-question-photo/);
+ assert.match(css,/\.photo-attribution/);
+ assert.match(html,/id="playerArtWrap" class="question-art player-art photo-frame"/);
+ assert.match(html,/id="boardArtWrap" class="question-art board-art photo-frame"/);
+ assert.match(html,/live\.js\?v=photo8/);
+ assert.match(html,/live\.css\?v=photo8/);
+});

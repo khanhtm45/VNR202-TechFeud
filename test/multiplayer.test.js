@@ -215,3 +215,114 @@ test('Phòng đã bắt đầu khóa đội mới, kết thúc chặn đăng ký
  assert.match(html,/live\.js\?v=room-switch7/);
  assert.match(js,/supabase-adapter\.js\?v=room-switch7/);
 });
+
+
+test('Runtime phone room switch: finished, expired, active and stale responses',async()=>{
+ const vm=require('node:vm');
+ const source=fs.readFileSync(path.join(__dirname,'../docs/live.js'),'utf8');
+ const html=fs.readFileSync(path.join(__dirname,'../docs/live.html'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../docs/live.css'),'utf8');
+ const part=(start,end)=>{
+   const a=source.indexOf(start);
+   const b=source.indexOf(end,a+start.length);
+   assert.ok(a>=0&&b>a,'Missing function block: '+start);
+   return source.slice(a,b);
+ };
+ const renderer=part('function renderPlayer(){','\nfunction renderBoard(){');
+ const inspection=part('async function inspectRoomJoinStatus(requested){','\nfunction clearPlayerRoom(){');
+ const clear=part('function clearPlayerRoom(){','\n/* Host privilege');
+ const elements=new Map(),saved=new Map();
+ let focused=false,unsubscribed=0,allowLeave=true;
+ const $=id=>{
+   if(!elements.has(id))elements.set(id,{
+     hidden:false,disabled:false,value:'',style:{},textContent:'',
+     focus(){focused=true;}
+   });
+   return elements.get(id);
+ };
+ const state={
+   mode:'player',code:'638908',user:{uid:'device-a'},app:{},
+   room:{status:'finished',expiresAtMs:Date.now()+60000,cursor:19,current:null},
+   teams:[{uid:'device-a',name:'Đội A',score:350}],optimisticMember:null,joinRoomInfo:null,
+   joinedCode:'638908',playerRoomEpoch:0,submitToken:0,submitting:false,latestCursor:19,selectedChoice:null,
+   $,
+   sanitizedCode:value=>String(value||'').replace(/\D/g,'').slice(0,6),
+   showText:(id,value)=>{$(id).textContent=String(value??'');},
+   getMember:()=>state.teams.find(t=>t.uid===state.user.uid)||null,
+   roomPhase:()=>state.room?.status==='finished'?'finished':state.room?.expiresAtMs<Date.now()?'expired':state.room?.status||null,
+   syncArt(){},renderQuestion(){},readLocal:()=>'',remaining:()=>15000,
+   saveLocal:(key,value)=>saved.set(key,value),
+   stopListening:()=>{unsubscribed++;},
+   setCode:value=>{state.code=value;$('joinCode').value=value;},
+   render:()=>state.renderPlayer(),
+   URL,location:{href:'https://example.test/live.html?mode=player&code=638908'},
+   history:{replaceState(...args){state.lastUrl=args[2];}},
+   confirm:()=>allowLeave,LETTERS:['A','B','C','D'],
+   call:()=>Promise.resolve({status:'finished',canJoin:false,member:false})
+ };
+ vm.createContext(state);
+ vm.runInContext(renderer+'\n'+inspection+'\n'+clear,state);
+ $('joinCode').value='638908';
+
+ // Registered player, completed room: visible result AND switch button.
+ state.renderPlayer();
+ assert.equal($('playerGame').hidden,false);
+ assert.equal($('playerFinishedPanel').hidden,false);
+ assert.equal($('playerRoomToolbar').hidden,false);
+ assert.match($('playerFinishedTitle').textContent,/kết thúc/i);
+
+ // An expired room, regardless of its lingering database status 'lobby'.
+ state.room={status:'lobby',expiresAtMs:Date.now()-60000,cursor:-1,current:null};
+ state.renderPlayer();
+ assert.equal($('playerWaiting').hidden,true);
+ assert.equal($('playerFinishedPanel').hidden,false);
+ assert.match($('playerFinishedTitle').textContent,/hết hạn/i);
+
+ // Switching clears localStorage and old subscriptions, revealing a usable form.
+ state.clearPlayerRoom();
+ assert.equal(state.code,'');
+ assert.equal($('joinFormPanel').hidden,false);
+ assert.equal($('playerGame').hidden,true);
+ assert.equal(saved.get('vnr202-joined-code'),'');
+ assert.ok(!state.lastUrl.includes('code='));
+ assert.ok(unsubscribed>0&&focused);
+
+ // A late QR to a finished room also has an escape hatch.
+ state.code='638908';$('joinCode').value='638908';
+ state.joinRoomInfo={code:'638908',status:'finished',canJoin:false,member:false};
+ state.renderPlayer();
+ assert.equal($('playerClosedPanel').hidden,false);
+ assert.equal($('joinFormPanel').hidden,true);
+ assert.equal($('playerRoomToolbar').hidden,false);
+ state.clearPlayerRoom();
+ assert.equal($('joinFormPanel').hidden,false);
+
+ // During a live question, the switch requires consent, and then works.
+ state.code='123456';$('joinCode').value='123456';
+ state.room={status:'question',expiresAtMs:Date.now()+60000,cursor:1,current:{id:'r1',stage:'rapid',choices:[],prompt:'Question'}};
+ state.teams=[{uid:'device-a',name:'Đội A',score:350}];
+ allowLeave=false;state.clearPlayerRoom();
+ assert.equal(state.code,'123456','Cancel must keep current question open');
+ allowLeave=true;state.clearPlayerRoom();
+ assert.equal(state.code,'','Confirmed switch must return to join form');
+
+ // Async room inspection returning later must not bring back a previous room.
+ state.code='123456';$('joinCode').value='123456';
+ let respond;
+ state.call=()=>new Promise(resolve=>{respond=resolve;});
+ const oldStatus=state.inspectRoomJoinStatus('123456');
+ state.clearPlayerRoom();
+ respond({status:'finished',canJoin:false,member:false});
+ await oldStatus;
+ assert.equal(state.joinRoomInfo,null);
+ assert.equal($('joinFormPanel').hidden,false);
+
+ // Confirm the visible switch control is wired and cached closed rooms do not auto-restore.
+ assert.match(html,/id="playerSwitchRoom"/);
+ assert.match(source,/\$\('playerSwitchRoom'\)\.onclick=clearPlayerRoom/);
+ assert.match(source,/restoredFromCache&&\['finished','expired','not_found','invalid'\]/);
+ assert.match(source,/const epoch=playerRoomEpoch/);
+ assert.match(source,/if\(!stillHere\(\)\)return/);
+ assert.match(source,/const answerCode=code,answerCursor=room\.cursor/);
+ assert.match(css,/\.player-room-toolbar/);
+});

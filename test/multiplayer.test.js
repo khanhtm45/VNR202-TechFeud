@@ -124,3 +124,26 @@ test('Tất cả 20 câu đều có SVG gốc, banner và QR ở cả MC/máy ch
  assert.match(css,/\.leaderboard-row/);
  assert.match(css,/\[hidden\]\s*\{\s*display:\s*none\s*!important/);
 });
+
+
+test('Regression: Supabase Auth ID maps to Firebase-style UID for MC and player',()=>{
+ const adapter=fs.readFileSync(path.join(__dirname,'../docs/supabase-adapter.js'),'utf8');
+ const js=fs.readFileSync(path.join(__dirname,'../docs/live.js'),'utf8');
+ const html=fs.readFileSync(path.join(__dirname,'../docs/live.html'),'utf8');
+ assert.match(adapter,/export function normalizeAuthUser\(user\)/);
+ assert.match(adapter,/uid:\s*user\.id/);
+ assert.match(adapter,/cb\(normalizeAuthUser\(data\?\.session\?\.user \|\| null\)\)/);
+ assert.match(adapter,/return \{user:normalizeAuthUser\(data\.user\)\}/);
+ assert.match(js,/room\?\.hostUid===user\?\.uid/);
+ assert.match(js,/teams\.find\(t=>t\.uid===user\?\.uid\)/);
+ assert.match(js,/optimisticMember=\{code:res\.code,uid:res\.teamId\|\|user\?\.uid/);
+ assert.match(js,/getMember\(\)/);
+ assert.match(html,/<form class="live-panel player-form" id="joinFormPanel"/);
+ assert.match(html,/id="joinRoom" class="live-button primary" type="submit"/);
+ assert.match(js,/\$\('joinFormPanel'\)\.addEventListener\('submit'/);
+ assert.match(js,/event\.preventDefault\(\)/);
+ assert.match(html,/id="playerWaiting"/);
+ assert.match(js,/showText\('playerWaitingCode',code/);
+ const input=fs.readFileSync(path.join(__dirname,'../docs/live.css'),'utf8');
+ assert.match(input,/\.player-waiting/);
+});

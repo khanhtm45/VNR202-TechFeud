@@ -109,6 +109,15 @@
         <div class="live-panel player-game" id="playerGame" hidden>
           <div class="section-line"><h3 id="myTeamName">Đội chơi</h3><span id="myScore" class="count-pill">0 điểm</span></div>
           <div id="playerStatus" class="live-muted">Đang chờ MC bắt đầu…</div>
+          <div id="playerWaiting" class="player-waiting" hidden aria-live="polite">
+            <div class="waiting-sparkles" aria-hidden="true">✦　✨　✦</div>
+            <span class="waiting-pill">✓ THAM GIA THÀNH CÔNG</span>
+            <h3>Đang chờ MC bắt đầu</h3>
+            <p>Đội đã vào phòng. Hãy giữ màn hình này để nhận câu hỏi và gửi đáp án khi MC bắt đầu.</p>
+            <div class="waiting-room-label">MÃ PHÒNG ĐÃ THAM GIA</div>
+            <div id="playerWaitingCode" class="waiting-room-code">------</div>
+            <div id="playerWaitingCount" class="waiting-room-count">Đang đồng bộ...</div>
+          </div>
           <div class="live-question">
             <div id="playerRound" class="live-kicker"></div>
             <figure id="playerArtWrap" class="question-art player-art" hidden>

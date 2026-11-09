@@ -175,3 +175,43 @@ test('MC thấy đội nào đã nộp câu hiện tại mà không lộ đáp �
  assert.match(css,/\.host-answer-item\.answered/);
  assert.match(css,/\.host-answer-list/);
 });
+
+
+test('Phòng đã bắt đầu khóa đội mới, kết thúc chặn đăng ký và xem trạng thái riêng',()=>{
+ const root=path.join(__dirname,'..');
+ const sql=fs.readFileSync(path.join(root,'supabase/migrations/202611090005_lock_room_registration.sql'),'utf8');
+ const adapter=fs.readFileSync(path.join(root,'docs/supabase-adapter.js'),'utf8');
+ const js=fs.readFileSync(path.join(root,'docs/live.js'),'utf8');
+ const html=fs.readFileSync(path.join(root,'docs/live.html'),'utf8');
+ const css=fs.readFileSync(path.join(root,'docs/live.css'),'utf8');
+
+ // The DB enforces these rules atomically with MC START via a room row lock.
+ assert.match(sql,/where code=p_code for update/);
+ const finishCheck=sql.indexOf("if v_room.status='finished' then");
+ const existingRejoin=sql.indexOf('select * into v_team');
+ const lobbyGuard=sql.indexOf("if v_room.status<>'lobby' then");
+ assert.ok(finishCheck>=0&&finishCheck<existingRejoin,'Finished rooms reject all new join calls before existing-team lookup');
+ assert.ok(lobbyGuard>existingRejoin,'Already-registered teams can reconnect during an active match');
+ assert.match(sql,/create or replace function public\.vnr_room_join_status/);
+ assert.match(sql,/v_status='lobby' and v_count<8/);
+ assert.match(sql,/v_room\.status='finished' then 'finished'/);
+ assert.match(sql,/grant execute on function public\.vnr_room_join_status\(text\) to authenticated/);
+ assert.ok(!sql.includes('private_payload'),'Public room status must never include private answer data');
+
+ // UI displays a persistent closed screen for nonmembers, instead of a wait state.
+ assert.match(adapter,/roomJoinStatus:'vnr_room_join_status'/);
+ assert.match(adapter,/name==='roomJoinStatus' \? \{p_code:payload\.code\}/);
+ assert.match(js,/async function inspectRoomJoinStatus\(requested\)/);
+ assert.match(js,/if\(!status\.member&&!status\.canJoin\)/);
+ assert.match(js,/status\.status==='finished'&&status\.member/);
+ assert.match(js,/status\?\.member && status\.status!=='expired'/);
+ assert.match(js,/renderHost.*room\.status!=='lobby'/s);
+ assert.match(js,/const waiting=!room\|\|room\.status==='lobby'/);
+ for(const id of ['playerClosedPanel','playerClosedTitle','playerClosedMessage','playerTryOtherRoom','playerFinishedPanel','playerFinishedScore','hostRoomClosed']){
+   assert.ok(html.includes('id="'+id+'"'),'Missing '+id+' in UI');
+ }
+ assert.match(css,/\.player-closed-panel/);
+ assert.match(css,/\.player-finished-panel/);
+ assert.match(html,/live\.js\?v=room-lock6/);
+ assert.match(js,/supabase-adapter\.js\?v=room-lock6/);
+});

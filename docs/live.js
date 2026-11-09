@@ -1,4 +1,4 @@
-import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=mc-progress5";
+import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=room-lock6";
 import {supabaseConfig,isSupabaseConfigured} from "./supabase-config.js?v=20261109-fix2";
 
 const $=id=>document.getElementById(id);
@@ -340,7 +340,7 @@ function renderPlayer(){
   const member=getMember();
   const currentInput=sanitizedCode($('joinCode').value);
   const info=mode==='player'&&joinRoomInfo?.code===currentInput?joinRoomInfo:null;
-  const blocked=Boolean(!member&&info&&!info.member&&!(info.status==='lobby'&&info.canJoin));
+  const blocked=Boolean(!member&&info&&(info.status==='expired'||(!info.member&&!(info.status==='lobby'&&info.canJoin))));
   $('joinFormPanel').hidden=Boolean(member)||blocked;
   $('playerClosedPanel').hidden=!blocked;
   $('playerGame').hidden=!member;

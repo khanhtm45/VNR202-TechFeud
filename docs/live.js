@@ -1,5 +1,6 @@
 import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=room-switch7";
 import {supabaseConfig,isSupabaseConfigured} from "./supabase-config.js?v=20261109-fix2";
+import {getQuestionPhoto} from "./art/question-photos.js?v=photo8";
 
 const $=id=>document.getElementById(id);
 const MODES=['host','player','board'];
@@ -186,10 +187,41 @@ function renderQr(which){
   }
 }
 function questionArt(q){
-  if(!q)return './art/banners/rapid.svg';
+  if(!q)return './art/photo-fallback.svg';
   const stage=Object.prototype.hasOwnProperty.call(ART_IDS,q.stage)?q.stage:'rapid';
   if(ART_IDS[stage].has(q.id))return './art/questions/'+q.id+'.svg';
   return './art/banners/'+stage+'.svg';
+}
+function attachQuestionPhoto(img,q){
+  const photo=getQuestionPhoto(q);
+  const desired=photo?.url||questionArt(q);
+  if(img.dataset.photoKey===desired)return photo;
+  img.dataset.photoKey=desired;
+  img.alt=photo?.alt||'Minh họa chủ đề câu hỏi';
+  // If Commons is inaccessible (mobile data, school Wi-Fi, privacy filter),
+  // retain a self-hosted scenic image, with no remote dependency.
+  img.onerror=()=>{
+    if(img.dataset.photoKey!==desired)return;
+    img.onerror=null;
+    img.src='./art/photo-fallback.svg';
+  };
+  img.src=desired;
+  return photo;
+}
+function updatePhotoCredit(fig,photo){
+  const caption=fig.querySelector('figcaption');
+  if(!caption)return;
+  caption.replaceChildren();
+  const label=element('span','photo-caption-label',photo?.alt||'Ảnh minh họa chủ đề');
+  caption.append(label);
+  if(photo){
+    const attribution=element('a','photo-attribution','Nguồn ảnh');
+    attribution.href=photo.source;
+    attribution.target='_blank';
+    attribution.rel='noopener noreferrer';
+    attribution.title='Xem tác giả và giấy phép ảnh trên Wikimedia Commons';
+    caption.append(attribution);
+  }
 }
 function syncArt(wrapId,imgId,q,showOnLobby=false){
   const wrap=$(wrapId),img=$(imgId);
@@ -197,10 +229,10 @@ function syncArt(wrapId,imgId,q,showOnLobby=false){
   const visible=Boolean(q)||(showOnLobby&&room?.status==='lobby');
   wrap.hidden=!visible;
   if(!visible)return;
-  const src=questionArt(q);
-  if(img.getAttribute('src')!==src){
-    img.src=src;
-    img.alt=q?'Hình minh họa chủ đề câu '+(q.number||''):'Ảnh chủ đề mở đầu gameshow';
+  const photo=attachQuestionPhoto(img,q);
+  if(wrap.dataset.captionKey!==(q?.id||'lobby')){
+    wrap.dataset.captionKey=q?.id||'lobby';
+    updatePhotoCredit(wrap,photo);
   }
 }
 function stopListening(){unRoom?.();unTeams?.();unRoom=null;unTeams=null;}
@@ -339,10 +371,15 @@ function renderHost(){
   const hostPrompt=$('hostPrompt');
   hostPrompt.replaceChildren();
   if(q){
+    const frame=element('figure','host-question-photo');
     const art=element('img','host-question-art');
-    art.src=questionArt(q);
-    art.alt='Hình minh họa câu '+(q.number||'');
-    hostPrompt.append(art);
+    art.loading='eager';
+    art.decoding='async';
+    const caption=element('figcaption','photo-credit');
+    frame.append(art,caption);
+    const photo=attachQuestionPhoto(art,q);
+    updatePhotoCredit(frame,photo);
+    hostPrompt.append(frame);
   }
   hostPrompt.append(element('p','',phase==='expired'?'Phòng đã hết hạn. Hãy tạo phòng mới.':
     q?.prompt||(phase==='finished'?'Gameshow đã kết thúc.':'Đang chờ MC tạo phòng hoặc bắt đầu câu hỏi.')));

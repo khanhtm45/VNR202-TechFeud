@@ -147,3 +147,30 @@ test('Regression: Supabase Auth ID maps to Firebase-style UID for MC and player'
  const input=fs.readFileSync(path.join(__dirname,'../docs/live.css'),'utf8');
  assert.match(input,/\.player-waiting/);
 });
+
+
+test('MC thấy đội nào đã nộp câu hiện tại mà không lộ đáp án trước công bố',()=>{
+ const root=path.join(__dirname,'..');
+ const sql=fs.readFileSync(path.join(root,'supabase/migrations/202611090004_live_answer_progress.sql'),'utf8');
+ const adapter=fs.readFileSync(path.join(root,'docs/supabase-adapter.js'),'utf8');
+ const js=fs.readFileSync(path.join(root,'docs/live.js'),'utf8');
+ const html=fs.readFileSync(path.join(root,'docs/live.html'),'utf8');
+ const css=fs.readFileSync(path.join(root,'docs/live.css'),'utf8');
+ assert.match(sql,/add column if not exists answered_cursor integer not null default -1/);
+ assert.match(sql,/update public\.vnr_room_teams\s+set answered_cursor=v_room\.cursor/);
+ assert.match(sql,/room_code=p_code and uid=v_uid/);
+ assert.match(sql,/Do NOT return points, correctness, or the answer/);
+ assert.ok(!/create policy .*submissions/.test(sql),'Không cấp quyền đọc đáp án cho client');
+ assert.match(adapter,/answeredCursor:data\.answered_cursor \?\? -1/);
+ assert.match(adapter,/select\('uid,name,position,score,last_gain,answered_cursor'\)/);
+ assert.match(js,/function renderHostAnswerProgress\(isHost\)/);
+ assert.match(js,/t\.answeredCursor===room\.cursor/);
+ assert.match(js,/renderHostAnswerProgress\(host\)/);
+ assert.match(js,/showText\('hostAnswerCount'/);
+ assert.match(js,/showText\('revealQuestion','✓ Công bố và chấm điểm/);
+ for(const id of ['hostAnswerTracker','hostAnswerCount','hostAnswerProgress','hostAnswerFill','hostAnswerList','hostAnswerHint']){
+   assert.ok(html.includes('id="'+id+'"'),id+' missing in MC markup');
+ }
+ assert.match(css,/\.host-answer-item\.answered/);
+ assert.match(css,/\.host-answer-list/);
+});

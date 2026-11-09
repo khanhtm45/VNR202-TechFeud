@@ -16,7 +16,7 @@ let mode=new URLSearchParams(location.search).get('mode')||'player';
 const urlCode=(new URLSearchParams(location.search).get('code')||'').trim();
 let code=/^\d{6}$/.test(urlCode)?urlCode:'';
 let app,auth,db,functions,user,room,teams=[],privateQuestions=null,hostAuthorized=false;
-let unRoom=null,unTeams=null,joinedCode='',optimisticMember=null,selectedChoice=null,submitting=false,closingKey='',latestCursor=-1;
+let unRoom=null,unTeams=null,joinedCode='',optimisticMember=null,joinRoomInfo=null,selectedChoice=null,submitting=false,closingKey='',latestCursor=-1;
 let toastTimer=null;
 
 function showText(id,value){const el=$(id);if(el)el.textContent=value==null?'':String(value);}
@@ -50,6 +50,27 @@ function rankings(){return [...teams].sort((a,b)=>(b.score||0)-(a.score||0)||(a.
 function formatClock(ms){const total=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
 function remaining(){return room?.status==='question'?Math.max(0,(room.deadlineMs||0)-Date.now()):0;}
 function call(name,data){return httpsCallable(functions,name)(data).then(r=>r.data);}
+async function inspectRoomJoinStatus(requested){
+  if(!user||!app||!/^[0-9]{6}$/.test(requested))return null;
+  const result=await call('roomJoinStatus',{code:requested});
+  // Ignore stale async responses after another room code has been entered.
+  if(mode==='player'&&sanitizedCode($('joinCode').value)===requested){
+    joinRoomInfo={...result,code:requested};
+    renderPlayer();
+  }
+  return result;
+}
+function clearPlayerRoom(){
+  stopListening();
+  room=null;teams=[];optimisticMember=null;joinRoomInfo=null;joinedCode='';
+  saveLocal('vnr202-joined-code','');
+  setCode('');
+  const url=new URL(location.href);
+  url.searchParams.delete('code');
+  history.replaceState({},'',url.pathname+url.search);
+  render();
+  $('joinCode').focus();
+}
 
 /* Host privilege is checked by a Supabase RPC. UI-only checks are not the security boundary:
    vnr_create_room and vnr_control_room independently enforce the allowlist server-side. */
@@ -277,7 +298,12 @@ function renderHost(){
   showText('teamCount',teams.length+'/8 đội');
   const host=hostAuthorized&&room?.hostUid===user?.uid;
   renderHostAnswerProgress(host);
-  $('hostRoomCard').hidden=!room||!host;
+  $('hostRoomCard').hidden=!room||!host||room.status!=='lobby';
+  $('hostRoomClosed').hidden=!(room&&host&&room.status!=='lobby');
+  if(room&&host&&room.status!=='lobby')
+    showText('hostRoomClosed',room.status==='finished'
+      ?'🏁 Gameshow đã kết thúc. Phòng đã đóng, không thể thêm đội mới.'
+      :'🔒 MC đã bắt đầu! Đăng ký đội mới đã khóa; các đội đã tham gia vẫn có thể chơi tiếp.');
   $('createRoom').disabled=!privateQuestions||!user||!hostAuthorized;
   if(room&&host){
     showText('hostRoomCode',code);
@@ -312,23 +338,48 @@ function renderHost(){
 }
 function renderPlayer(){
   const member=getMember();
-  $('joinFormPanel').hidden=Boolean(member);
+  const currentInput=sanitizedCode($('joinCode').value);
+  const info=mode==='player'&&joinRoomInfo?.code===currentInput?joinRoomInfo:null;
+  const blocked=Boolean(!member&&info&&!(info.status==='lobby'&&info.canJoin));
+  $('joinFormPanel').hidden=Boolean(member)||blocked;
+  $('playerClosedPanel').hidden=!blocked;
   $('playerGame').hidden=!member;
-  if(!member)return;
+  if(blocked){
+    const closed={
+      question:['🔒 MC đã bắt đầu','Đăng ký đã khóa. Chỉ những đội đã tham gia trước lúc bắt đầu mới được chơi.'],
+      revealed:['🔒 Phòng đang thi','MC đã công bố câu hỏi. Phòng không nhận thêm đội mới.'],
+      finished:['🏁 Gameshow đã kết thúc','Phòng đã kết thúc và không thể tham gia nữa. Chờ MC tạo phòng mới để chơi tiếp.'],
+      expired:['⌛ Phòng đã hết hạn','Mã phòng này đã hết thời gian hoạt động. Hãy lấy mã phòng mới từ MC.'],
+      not_found:['Không tìm thấy phòng','Kiểm tra lại mã gồm 6 chữ số được MC cung cấp.'],
+      invalid:['Mã phòng không hợp lệ','Mã phòng phải gồm đúng 6 chữ số.'],
+      lobby:['Phòng đã đủ 8 đội','MC đã có đủ tám đội. Phòng không thể nhận thêm đội mới.']
+    }[info.status]||['Phòng không nhận đội mới','Hãy hỏi MC để nhận mã phòng khác.'];
+    showText('playerClosedTitle',closed[0]);
+    showText('playerClosedMessage',closed[1]);
+    showText('playerClosedCode','PHÒNG '+currentInput);
+  }
+  if(!member){
+    $('playerFinishedPanel').hidden=true;
+    return;
+  }
+  const finished=room?.status==='finished';
+  $('playerFinishedPanel').hidden=!finished;
+  $('playerQuestionArea').hidden=finished;
+  if(finished)showText('playerFinishedScore',(member.score||0)+' điểm');
   const waiting=!room||room.status==='lobby';
   $('playerWaiting').hidden=!waiting;
   showText('playerWaitingCode',code||'------');
   showText('playerWaitingCount',room?(teams.length+'/8 đội đã tham gia'):'Đang đồng bộ phòng chơi…');
   showText('myTeamName',member.name);
   showText('myScore',(member.score||0)+' điểm');
-  const labels={lobby:'Đã vào phòng. Hãy chờ MC và các đội khác.',question:'Chọn một trong bốn đáp án!',revealed:'Đã công bố đáp án và cập nhật điểm.',finished:'Gameshow kết thúc. Chúc mừng tất cả các đội!'};
+  const labels={lobby:'Đã vào phòng. Hãy chờ MC và các đội khác.',question:'Chọn một trong bốn đáp án!',revealed:'Đã công bố đáp án và cập nhật điểm.',finished:'🏁 Gameshow đã kết thúc. Phòng đã khóa.'};
   showText('playerStatus',labels[room?.status]||'Đang đồng bộ…');
   const q=room?.current;
-  showText('playerRound',q?.stageLabel||'CHỜ BẮT ĐẦU');
-  syncArt('playerArtWrap','playerArt',q,true);
-  showText('playerPrompt',q?.prompt||(room?.status==='finished'?'🏆 Đội của bạn đạt '+member.score+' điểm':waiting?'Hãy sẵn sàng cho câu hỏi đầu tiên!':'Hãy chuẩn bị!'));
-  $('playerChoices').hidden=!q;
-  renderQuestion('playerChoices',true);
+  showText('playerRound',finished?'KẾT THÚC GAME SHOW':q?.stageLabel||'CHỜ BẮT ĐẦU');
+  syncArt('playerArtWrap','playerArt',q,!finished);
+  showText('playerPrompt',q?.prompt||(finished?'🏆 Đội của bạn đạt '+member.score+' điểm':waiting?'Hãy sẵn sàng cho câu hỏi đầu tiên!':'Hãy chuẩn bị!'));
+  $('playerChoices').hidden=!q||finished;
+  if(!finished)renderQuestion('playerChoices',true);
   const submissionKey='vnr202-answer-'+code+'-'+room?.cursor+'-'+user?.uid;
   const sent=readLocal(submissionKey);
   showText('playerFeedback',room?.status==='question'?(sent?'✓ Đã gửi đáp án. Đợi MC công bố.':remaining()===0?'Đã hết thời gian. Chờ MC chấm điểm.':'Trả lời trước khi hết giờ!'):'');
@@ -434,15 +485,39 @@ async function joinRoom(){
   if(wanted.length!==6||!teamName)return notify('Hãy nhập đủ mã phòng và tên đội.',true);
   $('joinRoom').disabled=true;
   try{
+    const status=await inspectRoomJoinStatus(wanted);
+    if(!status)return notify('Không kiểm tra được mã phòng.',true);
+    if(status.status==='finished'&&status.member){
+      // An already-registered team may view its final result, without a new join RPC.
+      saveLocal('vnr202-joined-code',wanted);
+      watchRoom(wanted);
+      notify('🏁 Gameshow đã kết thúc. Đây là kết quả đội của bạn.');
+      return;
+    }
+    if(!status.member&&!status.canJoin){
+      renderPlayer();
+      notify(status.status==='finished'?'Gameshow đã kết thúc. Không thể tham gia.':
+        status.status==='question'||status.status==='revealed'?'MC đã bắt đầu. Phòng đã khóa đăng ký.':
+        'Phòng không nhận đội mới.',true);
+      return;
+    }
+    if(status.status==='expired')return notify('Phòng đã hết hạn.',true);
+    // Server serializes MC start and team joins against the room row lock.
     const res=await call('joinRoom',{code:wanted,teamName});
     joinedCode=res.code;saveLocal('vnr202-joined-code',res.code);
-    // RPC confirms membership; show the waiting room immediately, even before Realtime responds.
+    joinRoomInfo=null;
     optimisticMember={code:res.code,uid:res.teamId||user?.uid,name:res.teamName,score:0,position:0};
     watchRoom(res.code);
     render();
-    notify(res.rejoined?'✓ Đã vào lại phòng. Chờ MC bắt đầu!':'✓ Đăng ký đội thành công! Đang ở màn hình chờ MC.');
-  }catch(err){notify(err.message||'Vào phòng thất bại.',true);}
-  finally{$('joinRoom').disabled=false;}
+    const resumed=res.rejoined&&res.roomStatus!=='lobby';
+    notify(resumed?'✓ Đã vào lại phòng đang thi. Tiếp tục trả lời!':
+      res.rejoined?'✓ Đã vào lại phòng. Chờ MC bắt đầu!':
+      '✓ Đăng ký đội thành công! Đang chờ MC bắt đầu.');
+  }catch(err){
+    // The MC may have started between status lookup and the join request.
+    await inspectRoomJoinStatus(wanted).catch(()=>{});
+    notify(err.message||'Vào phòng thất bại.',true);
+  }finally{$('joinRoom').disabled=false;}
 }
 async function loadQuestions(file){
   if(!file)return;
@@ -469,6 +544,11 @@ function wire(){
   $('hostPassword').addEventListener('keydown',e=>{if(e.key==='Enter')hostLogin();});
   $('hostSignOut').onclick=hostSignOut;
   $('questionUpload').addEventListener('change',e=>loadQuestions(e.target.files[0]));
+  $('joinCode').addEventListener('input',()=>{
+    joinRoomInfo=null;
+    if(mode==='player')renderPlayer();
+  });
+  $('playerTryOtherRoom').onclick=clearPlayerRoom;
   $('joinFormPanel').addEventListener('submit',event=>{
     event.preventDefault();
     if(!$('joinRoom').disabled)joinRoom();
@@ -494,6 +574,12 @@ function wire(){
   };
   window.addEventListener('popstate',()=>displayMode(new URLSearchParams(location.search).get('mode')||'player',false));
   setInterval(updateClocks,300);
+  // A non-member waiting on the entry form must see when MC closes registration.
+  setInterval(()=>{
+    if(mode!=='player'||getMember()||!app||!user)return;
+    const target=sanitizedCode($('joinCode').value);
+    if(target.length===6)inspectRoomJoinStatus(target).catch(()=>{});
+  },7500);
 }
 async function init(){
   wire();
@@ -528,6 +614,14 @@ async function init(){
     if(mode==='board'){
       try{await call('authorizeSpectator',{code});watchRoom(code);}
       catch(err){notify(err.message||'Không thể xem phòng.',true);render();}
+    }else if(mode==='player'){
+      // A QR link does not grant membership. Check state first, so closed rooms
+      // never appear to accept a new player.
+      try{
+        const status=await inspectRoomJoinStatus(code);
+        if(status?.member && status.status!=='expired')watchRoom(code);
+        else render();
+      }catch(err){notify('Không kiểm tra được trạng thái phòng: '+err.message,true);render();}
     }else watchRoom(code);
   }else render();
 }

@@ -6,8 +6,8 @@
 <title>VNR202 · Gameshow trực tuyến 8 đội</title>
 <link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <link rel="stylesheet" href="./styles.css?v=2">
-<link rel="stylesheet" href="./live.css?v=mc-progress5">
-<script type="module" src="./live.js?v=mc-progress5"></script>
+<link rel="stylesheet" href="./live.css?v=room-lock6">
+<script type="module" src="./live.js?v=room-lock6"></script>
 </head>
 <body class="live-page">
 <div class="page live-shell">
@@ -59,6 +59,7 @@
           <div class="live-divider"></div>
           <label class="field-label" for="hostCode">Mã phòng đã tạo (mở lại sau khi tải trang)</label>
           <div class="form-row"><input id="hostCode" maxlength="6" inputmode="numeric" placeholder="6 chữ số"><button id="resumeHost" type="button" class="live-button">Mở</button></div>
+          <div id="hostRoomClosed" class="host-room-closed" hidden>🔒 Đã khóa đăng ký đội mới. Chỉ các đội đã tham gia trước đó mới tiếp tục chơi.</div>
           <div id="hostRoomCard" class="host-room-card" hidden>
             <div class="qr-invite-icon" aria-hidden="true">✦ QR VÀO PHÒNG ✦</div>
             <h4>Quét để tham gia ngay</h4>
@@ -120,6 +121,14 @@
           <button id="joinRoom" class="live-button primary" type="submit" disabled>Tham gia phòng thi</button>
           <p class="field-help">Nhập mã phòng và tên đội rồi nhấn Enter hoặc nút tham gia. Khi thành công bạn sẽ thấy màn hình chờ MC bắt đầu.</p>
         </form>
+        <section id="playerClosedPanel" class="live-panel player-closed-panel" hidden aria-live="polite">
+          <div class="player-closed-icon" aria-hidden="true">🔒</div>
+          <span class="live-kicker">TRẠNG THÁI PHÒNG THI</span>
+          <h3 id="playerClosedTitle">Đăng ký đã đóng</h3>
+          <p id="playerClosedMessage">Phòng không còn tiếp nhận đội chơi mới.</p>
+          <div id="playerClosedCode" class="player-closed-code"></div>
+          <button id="playerTryOtherRoom" type="button" class="live-button primary">↩ Nhập mã phòng khác</button>
+        </section>
         <div class="live-panel player-game" id="playerGame" hidden>
           <div class="section-line"><h3 id="myTeamName">Đội chơi</h3><span id="myScore" class="count-pill">0 điểm</span></div>
           <div id="playerStatus" class="live-muted">Đang chờ MC bắt đầu…</div>
@@ -132,7 +141,13 @@
             <div id="playerWaitingCode" class="waiting-room-code">------</div>
             <div id="playerWaitingCount" class="waiting-room-count">Đang đồng bộ...</div>
           </div>
-          <div class="live-question">
+          <div id="playerFinishedPanel" class="player-finished-panel" hidden>
+            <span class="live-kicker">🏆 VNR202 • KẾT QUẢ CHUNG CUỘC</span>
+            <h3>Gameshow đã kết thúc!</h3>
+            <p>Phòng đã đóng và không nhận đội mới. Cảm ơn đội của bạn đã tham gia.</p>
+            <div id="playerFinishedScore" class="player-finished-score">0 điểm</div>
+          </div>
+          <div id="playerQuestionArea" class="live-question">
             <div id="playerRound" class="live-kicker"></div>
             <figure id="playerArtWrap" class="question-art player-art" hidden>
               <img id="playerArt" src="" alt="Hình minh họa cho câu hỏi" loading="eager" decoding="async">

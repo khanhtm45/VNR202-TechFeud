@@ -338,3 +338,50 @@ body[data-game-status="revealed"] .answer-reveal{
   .host-answer-count{font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){.host-answer-fill,.host-answer-item{transition:none}}
+
+
+/* Once MC begins, room registration closes for new participants. */
+.host-join-closed{
+  margin:15px 0 0;padding:14px 16px;border-radius:12px;
+  background:#6641285a;border:1px solid #f0c37b7d;
+  color:#ffe3b6;font-size:13px;font-weight:800;line-height:1.55;
+}
+.player-closed-panel{
+  text-align:center;padding:32px 22px 34px;
+  max-width:620px;margin:0 auto;
+  border-color:#e6b78399;
+  background:radial-gradient(circle at 50% 0%,#f0a15b29,transparent 55%),linear-gradient(135deg,#392c3e,#20283a)
+}
+.player-closed-icon{
+  font-size:44px;filter:drop-shadow(0 6px 12px #0004);
+  margin-bottom:15px;
+}
+.player-closed-panel h3{
+  font:900 clamp(24px,5vw,35px)/1.25 Georgia,serif;
+  color:#ffe3a6;margin:12px 0;
+}
+.player-closed-panel p{font-size:15px;line-height:1.65;color:#f0dbe6;max-width:485px;margin:0 auto}
+.player-closed-code{
+  margin:18px auto 22px;display:inline-block;padding:12px 20px;
+  border:1px solid #bda18b75;border-radius:12px;background:#0002;
+  font-size:18px;letter-spacing:.14em;font-weight:900;color:#f5d59e
+}
+.player-closed-panel .live-button{display:block;margin:3px auto 0;min-height:48px}
+.player-finished-panel{
+  padding:24px 16px 26px;margin:18px 0;border:1px solid #e4c388a5;
+  background:radial-gradient(circle at 50% 0%,#e5c77c35,transparent 53%),linear-gradient(130deg,#513748,#243543);
+  border-radius:18px;text-align:center
+}
+.player-finished-panel h3{
+  font:900 clamp(25px,5vw,38px)/1.3 Georgia,serif;
+  color:#ffe1a5;margin:13px 0 9px
+}
+.player-finished-panel p{color:#efdfec;line-height:1.6;max-width:500px;margin:0 auto}
+.player-finished-score{
+  color:#ffeaa6;font-weight:900;font-variant-numeric:tabular-nums;
+  font-size:clamp(32px,7vw,53px);margin:17px auto 0
+}
+@media(max-width:480px){
+  .player-closed-panel{padding:26px 16px 29px}
+  .player-closed-panel p{font-size:14px}
+}

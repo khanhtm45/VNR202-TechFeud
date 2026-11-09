@@ -54,6 +54,16 @@ Gameshow môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại h
 - Trước khi công bố, MC chỉ xem **trạng thái đã/chưa trả lời**, không hiển thị lựa chọn A/B/C/D, tính đúng sai hay điểm tạm tính. Sau khi công bố, bảng hiển thị điểm vừa cộng.
 - Chế độ này được triển khai trong migration `supabase/migrations/202611090004_live_answer_progress.sql`. Không cần MC upload lại bộ 20 câu hỏi JSON.
 
+## 🔒 Quy tắc khóa đăng ký theo trạng thái phòng
+
+| Trạng thái phòng | Đội mới | Đội đã đăng ký trước đó |
+|---|---|---|
+| **Chờ MC bắt đầu** | Được đăng ký nếu còn chỗ (tối đa 8 đội) | Được vào lại |
+| **Đang thi / vừa công bố câu** | **Bị từ chối**; hiện màn hình đăng ký đã khóa | Được kết nối lại để tiếp tục |
+| **Gameshow đã kết thúc** | **Bị từ chối**; hiện màn hình đã kết thúc | Chỉ được xem kết quả cuối, không mở lượt đăng ký mới |
+| **Phòng hết hạn** | Bị từ chối | Cần phòng mới |
+
+Supabase kiểm tra khi nộp yêu cầu vào phòng và đồng bộ trạng thái qua RPC `vnr_room_join_status`, với kiểm tra trạng thái thật trong `vnr_join_room` để tránh đăng ký lọt giữa lúc MC bắt đầu. Người nhập mã QR muộn sẽ thấy lý do phòng khóa thay vì màn hình **Đợi MC bắt đầu**. MC ẩn QR mời đội mới sau lúc bắt đầu.
 ## 🖥 Chế độ một máy — dự phòng khi không có backend
 
 **[Mở giao diện gốc](https://khanhtm45.github.io/VNR202-TechFeud/)**

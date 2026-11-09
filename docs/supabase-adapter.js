@@ -23,20 +23,25 @@ export function initializeApp(config) {
   });
 }
 
+// Supabase Auth returns user.id; the original VNR202 UI expects Firebase's user.uid.
+ // Normalize in one place so MC ownership and player membership work on every device.
+export function normalizeAuthUser(user) {
+  return user ? { ...user, uid: user.id } : null;
+}
 export function getAuth(client) { return { client }; }
 export function onAuthStateChanged(auth, cb, onError) {
   let active = true;
   auth.client.auth.getSession().then(({data,error}) => {
     if (!active) return;
     if(error) return onError?.(error);
-    cb(data?.session?.user || null);
+    cb(normalizeAuthUser(data?.session?.user || null));
   }).catch(e => { if(active) onError?.(e); });
   return () => { active = false; };
 }
 export async function signInAnonymously(auth) {
   const {data,error} = await auth.client.auth.signInAnonymously();
   if(error) throw new Error('Không thể đăng nhập ẩn danh: '+error.message);
-  return {user:data.user};
+  return {user:normalizeAuthUser(data.user)};
 }
 
 export function getFirestore(client) {return client;}

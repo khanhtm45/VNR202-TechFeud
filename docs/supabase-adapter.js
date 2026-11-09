@@ -50,6 +50,7 @@ export function getFunctions(client) {return client;}
 const RPC_NAMES={
   createRoom:'vnr_create_room',
   joinRoom:'vnr_join_room',
+  roomJoinStatus:'vnr_room_join_status',
   authorizeSpectator:'vnr_authorize_spectator',
   controlGame:'vnr_control_room',
   submitAnswer:'vnr_submit_answer'
@@ -61,6 +62,7 @@ export function httpsCallable(client, name) {
   return async payload => {
     const args = name==='createRoom' ? {p_questions:payload.questions} :
       name==='joinRoom' ? {p_code:payload.code,p_name:payload.teamName} :
+      name==='roomJoinStatus' ? {p_code:payload.code} :
       name==='authorizeSpectator' ? {p_code:payload.code} :
       name==='controlGame' ? {p_code:payload.code,p_action:payload.action} :
       {p_code:payload.code,p_choice:payload.choice};

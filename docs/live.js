@@ -354,53 +354,80 @@ function renderHost(){
 }
 function renderPlayer(){
   const member=getMember();
-  const currentInput=sanitizedCode($('joinCode').value);
-  const info=mode==='player'&&joinRoomInfo?.code===currentInput?joinRoomInfo:null;
-  const blocked=Boolean(!member&&info&&(info.status==='expired'||(!info.member&&!(info.status==='lobby'&&info.canJoin))));
+  const phase=roomPhase();
+  const inputCode=sanitizedCode($('joinCode').value);
+  const info=mode==='player'&&joinRoomInfo?.code===inputCode?joinRoomInfo:null;
+  const blocked=Boolean(!member&&info&&
+    (info.status==='expired'||(!info.member&&!(info.status==='lobby'&&info.canJoin))));
+
+  // Always offer a way out, even during a live question or after finishing.
+  const canSwitch=mode==='player'&&(code.length===6||Boolean(info)||Boolean(member));
+  $('playerRoomToolbar').hidden=!canSwitch;
+  showText('playerCurrentRoom','PHÒNG '+(code||inputCode||'------'));
+
   $('joinFormPanel').hidden=Boolean(member)||blocked;
   $('playerClosedPanel').hidden=!blocked;
   $('playerGame').hidden=!member;
+
   if(blocked){
     const closed={
-      question:['🔒 MC đã bắt đầu','Đăng ký đã khóa. Chỉ những đội đã tham gia trước lúc bắt đầu mới được chơi.'],
-      revealed:['🔒 Phòng đang thi','MC đã công bố câu hỏi. Phòng không nhận thêm đội mới.'],
-      finished:['🏁 Gameshow đã kết thúc','Phòng đã kết thúc và không thể tham gia nữa. Chờ MC tạo phòng mới để chơi tiếp.'],
-      expired:['⌛ Phòng đã hết hạn','Mã phòng này đã hết thời gian hoạt động. Hãy lấy mã phòng mới từ MC.'],
-      not_found:['Không tìm thấy phòng','Kiểm tra lại mã gồm 6 chữ số được MC cung cấp.'],
+      question:['🔒 MC đã bắt đầu','Phòng không nhận thêm đội mới. Hãy nhập mã phòng khác.'],
+      revealed:['🔒 Phòng đang thi','Đăng ký đã khóa vì MC đã bắt đầu câu hỏi.'],
+      finished:['🏁 Gameshow đã kết thúc','Phòng đã đóng. Bạn có thể nhập mã một phòng khác để tham gia.'],
+      expired:['⌛ Phòng đã hết hạn','Mã phòng không còn hiệu lực. Hãy lấy mã phòng mới từ MC.'],
+      not_found:['Không tìm thấy phòng','Kiểm tra mã gồm 6 chữ số được MC cung cấp.'],
       invalid:['Mã phòng không hợp lệ','Mã phòng phải gồm đúng 6 chữ số.'],
-      lobby:['Phòng đã đủ 8 đội','MC đã có đủ tám đội. Phòng không thể nhận thêm đội mới.']
-    }[info.status]||['Phòng không nhận đội mới','Hãy hỏi MC để nhận mã phòng khác.'];
+      lobby:['Phòng đã đủ 8 đội','Phòng đã đủ số đội. Hãy lấy mã phòng khác từ MC.']
+    }[info.status]||['Phòng không nhận đội mới','Hãy hỏi MC để lấy mã phòng khác.'];
     showText('playerClosedTitle',closed[0]);
     showText('playerClosedMessage',closed[1]);
-    showText('playerClosedCode','PHÒNG '+currentInput);
+    showText('playerClosedCode','PHÒNG '+inputCode);
   }
   if(!member){
     $('playerFinishedPanel').hidden=true;
     return;
   }
-  const finished=room?.status==='finished';
-  $('playerFinishedPanel').hidden=!finished;
-  $('playerQuestionArea').hidden=finished;
-  if(finished)showText('playerFinishedScore',(member.score||0)+' điểm');
-  const waiting=!room||room.status==='lobby';
+  const finished=phase==='finished';
+  const expired=phase==='expired';
+  const ended=finished||expired;
+  $('playerFinishedPanel').hidden=!ended;
+  $('playerQuestionArea').hidden=ended;
+  if(ended){
+    showText('playerFinishedTitle',finished?'🏆 Gameshow đã kết thúc!':'⌛ Phòng đã hết hạn');
+    showText('playerFinishedMessage',finished
+      ?'Phòng đã kết thúc. Bạn có thể xem điểm cuối hoặc chuyển sang phòng mới.'
+      :'Thời gian hoạt động của phòng đã hết. Bạn có thể rời phòng và nhập mã mới.');
+    showText('playerFinishedScore',(member.score||0)+' điểm');
+  }
+
+  const waiting=!room||phase==='lobby';
   $('playerWaiting').hidden=!waiting;
   showText('playerWaitingCode',code||'------');
   showText('playerWaitingCount',room?(teams.length+'/8 đội đã tham gia'):'Đang đồng bộ phòng chơi…');
   showText('myTeamName',member.name);
   showText('myScore',(member.score||0)+' điểm');
-  const labels={lobby:'Đã vào phòng. Hãy chờ MC và các đội khác.',question:'Chọn một trong bốn đáp án!',revealed:'Đã công bố đáp án và cập nhật điểm.',finished:'🏁 Gameshow đã kết thúc. Phòng đã khóa.'};
-  showText('playerStatus',labels[room?.status]||'Đang đồng bộ…');
+  const labels={
+    lobby:'Đã vào phòng. Hãy chờ MC và các đội khác.',
+    question:'Chọn một trong bốn đáp án!',
+    revealed:'Đã công bố đáp án và cập nhật điểm.',
+    finished:'🏆 Gameshow đã kết thúc. Bạn có thể đổi sang phòng khác.',
+    expired:'⌛ Phòng đã hết hạn. Hãy nhập mã phòng mới.'
+  };
+  showText('playerStatus',labels[phase]||'Đang đồng bộ…');
   const q=room?.current;
-  showText('playerRound',finished?'KẾT THÚC GAME SHOW':q?.stageLabel||'CHỜ BẮT ĐẦU');
-  syncArt('playerArtWrap','playerArt',q,!finished);
-  showText('playerPrompt',q?.prompt||(finished?'🏆 Đội của bạn đạt '+member.score+' điểm':waiting?'Hãy sẵn sàng cho câu hỏi đầu tiên!':'Hãy chuẩn bị!'));
-  $('playerChoices').hidden=!q||finished;
-  if(!finished)renderQuestion('playerChoices',true);
+  showText('playerRound',ended?'PHÒNG ĐÃ ĐÓNG':q?.stageLabel||'CHỜ BẮT ĐẦU');
+  syncArt('playerArtWrap','playerArt',ended?null:q,waiting&&!ended);
+  showText('playerPrompt',ended
+    ?''
+    :q?.prompt||(waiting?'Hãy sẵn sàng cho câu hỏi đầu tiên!':'Hãy chuẩn bị!'));
+  $('playerChoices').hidden=!q||ended;
+  if(!ended)renderQuestion('playerChoices',true);
   const submissionKey='vnr202-answer-'+code+'-'+room?.cursor+'-'+user?.uid;
   const sent=readLocal(submissionKey);
-  showText('playerFeedback',room?.status==='question'?(sent?'✓ Đã gửi đáp án. Đợi MC công bố.':remaining()===0?'Đã hết thời gian. Chờ MC chấm điểm.':'Trả lời trước khi hết giờ!'):'');
-  $('playerReveal').hidden=room?.status!=='revealed';
-  showText('playerReveal',room?.status==='revealed'?'Đáp án: '+LETTERS[room.reveal.correctIndex]+'. '+room.reveal.correctText+' — '+room.reveal.explanation:'');
+  showText('playerFeedback',phase==='question'?(sent?'✓ Đã gửi đáp án. Đợi MC công bố.':remaining()===0?'Đã hết thời gian. Chờ MC chấm điểm.':'Trả lời trước khi hết giờ!'):'');
+  $('playerReveal').hidden=phase!=='revealed';
+  showText('playerReveal',phase==='revealed'
+    ?'Đáp án: '+LETTERS[room.reveal.correctIndex]+'. '+room.reveal.correctText+' — '+room.reveal.explanation:'');
 }
 function renderBoard(){
   renderTeams('boardTeams');

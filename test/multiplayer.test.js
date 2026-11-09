@@ -163,6 +163,7 @@ test('MC thấy đội nào đã nộp câu hiện tại mà không lộ đáp �
  assert.ok(!/create policy .*submissions/.test(sql),'Không cấp quyền đọc đáp án cho client');
  assert.match(adapter,/answeredCursor:data\.answered_cursor \?\? -1/);
  assert.match(adapter,/select\('uid,name,position,score,last_gain,answered_cursor'\)/);
+ assert.match(adapter,/kind==='teams'\?4000:9500/);
  assert.match(js,/function renderHostAnswerProgress\(isHost\)/);
  assert.match(js,/t\.answeredCursor===room\.cursor/);
  assert.match(js,/renderHostAnswerProgress\(host\)/);

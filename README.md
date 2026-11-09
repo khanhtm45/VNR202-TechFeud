@@ -34,6 +34,15 @@ Gameshow môn **Lịch sử Đảng Cộng sản Việt Nam (VNR202)**: Đại h
 
 **Tài nguyên miễn phí:** Supabase có gói Free với hạn mức, có thể tự tạm dừng database sau thời gian không hoạt động. Nên mở trang và chạy thử trước buổi học.
 
+## 📷 Ảnh tư liệu & bố cục câu hỏi (phiên bản photo8)
+
+- **20 ảnh theo mã câu r1–r8, f1–f6, g1–g6** thay thế các hình minh họa kiểu emoji trong màn hình **MC, đội chơi và máy chiếu**.
+- Giao diện mới dùng **khung ảnh 16:9/16:10**, nền phủ chuyển sắc, chú thích ngắn và đường dẫn tác giả/giấy phép trực tiếp dưới ảnh.
+- Ảnh được tuyển chọn từ Wikimedia Commons để minh họa các chủ đề Đại hội, văn kiện, nhân lực, kinh tế, ngập lụt, rác thải, hạn hán, năng lượng và bão. **Một số ảnh là hình gợi bối cảnh, không phải ảnh chụp trực tiếp Đại hội XI/XII.**
+- Mỗi ảnh được gán từ **ID câu hỏi công khai**, không sửa bộ JSON chứa đáp án. File ánh xạ: `docs/art/question-photos.js`; ghi nguồn: `docs/art/PHOTO_SOURCES.md`.
+- Ảnh được tải từ Wikimedia khi mở câu; nếu mạng trường học chặn hoặc mất kết nối, giao diện tự đổi sang `docs/art/photo-fallback.svg` (không dùng emoji).
+- Vẫn giữ nguyên 3 vòng, câu hỏi, giới hạn thời gian, phân quyền MC, điểm và Supabase. Cập nhật `docs/live.html` lên `photo8` để tránh cache phiên bản cũ.
+
 ## ✨ Giao diện minh họa, QR chờ đội và hiệu ứng
 
 - **20 ảnh SVG minh họa gốc**, một ảnh cho mỗi mã câu hỏi của bộ JSON 20 câu VNR202: r1–r8, f1–f6, g1–g6, lưu tại `docs/art/questions/`. Đây là **đồ họa minh họa**, không phải ảnh tư liệu Đại hội.

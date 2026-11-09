@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="VNR202 — phong cảnh Việt Nam minh họa">
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#324658"/><stop offset=".56" stop-color="#355c64"/><stop offset="1" stop-color="#163d49"/></linearGradient>
+ <linearGradient id="land" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#83998b"/><stop offset="1" stop-color="#334c47"/></linearGradient>
+ <linearGradient id="river" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#79aeb0"/><stop offset="1" stop-color="#355c78"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#cbdbd2"/><stop offset="1" stop-color="#536d73"/></linearGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="1200" height="675" fill="url(#sky)"/>
+<circle cx="914" cy="139" r="118" fill="#f2cd91" opacity=".25" filter="url(#soft)"/>
+<circle cx="914" cy="139" r="83" fill="#f0d6b1" opacity=".6"/>
+<path d="M0 422L138 262 254 361 391 205 564 443 729 294 870 392 1050 212 1200 390V675H0Z" fill="#4b6669" opacity=".7"/>
+<path d="M0 459L170 322 355 459 558 306 753 470 965 320 1200 458V675H0Z" fill="#284956" opacity=".85"/>
+<path d="M0 521C200 445 355 541 571 489S963 490 1200 449V675H0Z" fill="url(#land)"/>
+<path d="M0 602C207 510 390 614 626 542S985 540 1200 499V675H0Z" fill="url(#river)" opacity=".8"/>
+<g transform="translate(90 273)" fill="#bdd0c2" opacity=".76">
+ <path d="M0 198V20L105-10l105 30v178H0Z"/>
+ <path d="M23 189V48h164v141" fill="none" stroke="#315866" stroke-width="8"/>
+ <path d="M53 60v115m53-115v115m54-115v115" stroke="#315866" stroke-width="12"/>
+ <path d="M7 26 109-14l100 40" fill="none" stroke="#d8e2cb" stroke-width="11" stroke-linecap="round"/>
+</g>
+<g opacity=".46" fill="none" stroke="#d7e5d9">
+ <path d="M570 462q80-76 162-1t172-1t220 4" stroke-width="9"/>
+ <path d="M535 491q90-70 192-6t184-10t260 12" stroke-width="4"/>
+</g>
+<rect width="1200" height="675" fill="#1a2636" opacity=".12"/>
+<text x="71" y="91" font-family="Arial,sans-serif" font-size="20" letter-spacing="6" fill="#fff4d6" font-weight="bold">VNR202 · HÀNH TRÌNH ĐỔI MỚI</text>
+<text x="71" y="145" font-family="Arial,sans-serif" font-size="18" fill="#fff4d6" opacity=".83">HÌNH MINH HỌA CHỦ ĐỀ</text>
+</svg>

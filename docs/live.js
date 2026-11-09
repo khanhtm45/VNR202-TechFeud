@@ -192,9 +192,10 @@ function questionArt(q){
   if(ART_IDS[stage].has(q.id))return './art/questions/'+q.id+'.svg';
   return './art/banners/'+stage+'.svg';
 }
+const unavailablePhotos=new Set();
 function attachQuestionPhoto(img,q){
   const photo=getQuestionPhoto(q);
-  const desired=photo?.url||questionArt(q);
+  const desired=photo?.url&&!unavailablePhotos.has(photo.url)?photo.url:'./art/photo-fallback.svg';
   if(img.dataset.photoKey===desired)return photo;
   img.dataset.photoKey=desired;
   img.alt=photo?.alt||'Minh họa chủ đề câu hỏi';
@@ -202,6 +203,7 @@ function attachQuestionPhoto(img,q){
   // retain a self-hosted scenic image, with no remote dependency.
   img.onerror=()=>{
     if(img.dataset.photoKey!==desired)return;
+    unavailablePhotos.add(desired);
     img.onerror=null;
     img.src='./art/photo-fallback.svg';
   };
@@ -215,7 +217,7 @@ function updatePhotoCredit(fig,photo){
   const label=element('span','photo-caption-label',photo?.alt||'Ảnh minh họa chủ đề');
   caption.append(label);
   if(photo){
-    const attribution=element('a','photo-attribution','Nguồn ảnh');
+    const attribution=element('a','photo-attribution',(photo.credit||'Wikimedia Commons')+' · nguồn & giấy phép');
     attribution.href=photo.source;
     attribution.target='_blank';
     attribution.rel='noopener noreferrer';

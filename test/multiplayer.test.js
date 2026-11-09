@@ -204,14 +204,14 @@ test('Phòng đã bắt đầu khóa đội mới, kết thúc chặn đăng ký
  assert.match(js,/async function inspectRoomJoinStatus\(requested\)/);
  assert.match(js,/if\(!status\.member&&!status\.canJoin\)/);
  assert.match(js,/status\.status==='finished'&&status\.member/);
- assert.match(js,/status\?\.member && status\.status!=='expired'/);
- assert.match(js,/renderHost.*room\.status!=='lobby'/s);
- assert.match(js,/const waiting=!room\|\|room\.status==='lobby'/);
+ assert.match(js,/status\?\.member&&status\.status!=='expired'/);
+ assert.match(js,/\$\('hostRoomCard'\)\.hidden=!room\|\|!host\|\|phase!=='lobby'/);
+ assert.match(js,/const waiting=!room\|\|phase==='lobby'/);
  for(const id of ['playerClosedPanel','playerClosedTitle','playerClosedMessage','playerTryOtherRoom','playerFinishedPanel','playerFinishedScore','hostRoomClosed']){
    assert.ok(html.includes('id="'+id+'"'),'Missing '+id+' in UI');
  }
  assert.match(css,/\.player-closed-panel/);
  assert.match(css,/\.player-finished-panel/);
- assert.match(html,/live\.js\?v=room-lock6/);
- assert.match(js,/supabase-adapter\.js\?v=room-lock6/);
+ assert.match(html,/live\.js\?v=room-switch7/);
+ assert.match(js,/supabase-adapter\.js\?v=room-switch7/);
 });

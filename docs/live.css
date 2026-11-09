@@ -385,3 +385,30 @@ body[data-game-status="revealed"] .answer-reveal{
   .player-closed-panel{padding:26px 16px 29px}
   .player-closed-panel p{font-size:14px}
 }
+
+
+/* Persistent room-switch control for phones, including waiting/playing/closed states. */
+.player-room-toolbar{
+  position:sticky;top:9px;z-index:12;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin:6px 0 18px;padding:11px 15px;
+  border:1px solid #f0cf8d90;border-radius:15px;
+  background:linear-gradient(110deg,#372a42f2,#1c3740f5);
+  box-shadow:0 10px 25px #0006,inset 0 1px #ffffff1b;
+  backdrop-filter:blur(12px);
+}
+.player-current-room{
+  color:#ffe2a5;font-size:13px;font-weight:900;letter-spacing:.1em;
+  font-variant-numeric:tabular-nums;
+}
+.live-page .player-switch-button{
+  background:linear-gradient(115deg,#e8c17e,#f5dfa7);
+  color:#2b2030;border:1px solid #f7db9a;
+  font-size:12px;font-weight:900;padding:11px 15px;min-height:42px;
+}
+.live-page .player-switch-button:hover{filter:brightness(1.12)}
+@media(max-width:480px){
+  .player-room-toolbar{padding:9px 10px;gap:8px}
+  .player-current-room{font-size:12px}
+  .live-page .player-switch-button{font-size:11px;padding:10px 11px}
+}

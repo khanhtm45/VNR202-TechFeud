@@ -1,4 +1,4 @@
-import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=20261109-fix2";
+import {initializeApp,getAuth,onAuthStateChanged,signInAnonymously,getFirestore,doc,collection,onSnapshot,getFunctions,httpsCallable} from "./supabase-adapter.js?v=identity4";
 import {supabaseConfig,isSupabaseConfigured} from "./supabase-config.js?v=20261109-fix2";
 
 const $=id=>document.getElementById(id);
@@ -16,7 +16,7 @@ let mode=new URLSearchParams(location.search).get('mode')||'player';
 const urlCode=(new URLSearchParams(location.search).get('code')||'').trim();
 let code=/^\d{6}$/.test(urlCode)?urlCode:'';
 let app,auth,db,functions,user,room,teams=[],privateQuestions=null,hostAuthorized=false;
-let unRoom=null,unTeams=null,joinedCode='',selectedChoice=null,submitting=false,closingKey='',latestCursor=-1;
+let unRoom=null,unTeams=null,joinedCode='',optimisticMember=null,selectedChoice=null,submitting=false,closingKey='',latestCursor=-1;
 let toastTimer=null;
 
 function showText(id,value){const el=$(id);if(el)el.textContent=value==null?'':String(value);}
@@ -40,7 +40,11 @@ function displayMode(next,writeUrl=true){
 function readLocal(key){try{return localStorage.getItem(key)||'';}catch{return '';}}
 function saveLocal(key,value){try{localStorage.setItem(key,value);}catch{}}
 function teamName(uid){return teams.find(t=>t.uid===uid)?.name||'Đội chơi';}
-function getMember(){return teams.find(t=>t.uid===user?.uid)||null;}
+function getMember(){
+  // Give immediate feedback after a successful server join; realtime snapshot may take a moment.
+  return teams.find(t=>t.uid===user?.uid)
+    || (optimisticMember?.uid===user?.uid&&optimisticMember?.code===code?optimisticMember:null);
+}
 function sortedTeams(){return [...teams].sort((a,b)=>(a.position||0)-(b.position||0));}
 function rankings(){return [...teams].sort((a,b)=>(b.score||0)-(a.score||0)||(a.position||0)-(b.position||0));}
 function formatClock(ms){const total=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
@@ -176,6 +180,8 @@ function watchRoom(value){
   },err=>{setConnection('Mất kết nối Supabase');notify('Không đọc được phòng: '+err.message,true);});
   unTeams=onSnapshot(collection(db,'rooms',next,'teams'),snapshot=>{
     teams=snapshot.docs.map(d=>({uid:d.id,...d.data()}));
+    if(optimisticMember?.code===next&&teams.some(t=>t.uid===optimisticMember.uid))
+      optimisticMember=null;
     render();
   },err=>notify('Không đọc được đội chơi: '+err.message,true));
   render();
@@ -265,6 +271,10 @@ function renderPlayer(){
   $('joinFormPanel').hidden=Boolean(member);
   $('playerGame').hidden=!member;
   if(!member)return;
+  const waiting=!room||room.status==='lobby';
+  $('playerWaiting').hidden=!waiting;
+  showText('playerWaitingCode',code||'------');
+  showText('playerWaitingCount',room?(teams.length+'/8 đội đã tham gia'):'Đang đồng bộ phòng chơi…');
   showText('myTeamName',member.name);
   showText('myScore',(member.score||0)+' điểm');
   const labels={lobby:'Đã vào phòng. Hãy chờ MC và các đội khác.',question:'Chọn một trong bốn đáp án!',revealed:'Đã công bố đáp án và cập nhật điểm.',finished:'Gameshow kết thúc. Chúc mừng tất cả các đội!'};
@@ -272,7 +282,7 @@ function renderPlayer(){
   const q=room?.current;
   showText('playerRound',q?.stageLabel||'CHỜ BẮT ĐẦU');
   syncArt('playerArtWrap','playerArt',q,true);
-  showText('playerPrompt',q?.prompt||(room?.status==='finished'?'🏆 Đội của bạn đạt '+member.score+' điểm':'Hãy chuẩn bị!'));
+  showText('playerPrompt',q?.prompt||(room?.status==='finished'?'🏆 Đội của bạn đạt '+member.score+' điểm':waiting?'Hãy sẵn sàng cho câu hỏi đầu tiên!':'Hãy chuẩn bị!'));
   $('playerChoices').hidden=!q;
   renderQuestion('playerChoices',true);
   const submissionKey='vnr202-answer-'+code+'-'+room?.cursor+'-'+user?.uid;
@@ -382,8 +392,11 @@ async function joinRoom(){
   try{
     const res=await call('joinRoom',{code:wanted,teamName});
     joinedCode=res.code;saveLocal('vnr202-joined-code',res.code);
+    // RPC confirms membership; show the waiting room immediately, even before Realtime responds.
+    optimisticMember={code:res.code,uid:res.teamId||user?.uid,name:res.teamName,score:0,position:0};
     watchRoom(res.code);
-    notify(res.rejoined?'✓ Đã vào lại phòng với tên '+res.teamName:'✓ Đăng ký đội thành công!');
+    render();
+    notify(res.rejoined?'✓ Đã vào lại phòng. Chờ MC bắt đầu!':'✓ Đăng ký đội thành công! Đang ở màn hình chờ MC.');
   }catch(err){notify(err.message||'Vào phòng thất bại.',true);}
   finally{$('joinRoom').disabled=false;}
 }
@@ -412,7 +425,10 @@ function wire(){
   $('hostPassword').addEventListener('keydown',e=>{if(e.key==='Enter')hostLogin();});
   $('hostSignOut').onclick=hostSignOut;
   $('questionUpload').addEventListener('change',e=>loadQuestions(e.target.files[0]));
-  $('joinRoom').onclick=joinRoom;
+  $('joinFormPanel').addEventListener('submit',event=>{
+    event.preventDefault();
+    if(!$('joinRoom').disabled)joinRoom();
+  });
   $('resumeHost').onclick=()=>watchRoom($('hostCode').value);
   $('watchBoard').onclick=async()=>{
     const newCode=sanitizedCode($('boardCode').value);
